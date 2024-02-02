@@ -1,0 +1,12 @@
+{
+    "ssid": "Kean",
+    "password": "Kean.2023",
+    "ip": "192.168.8.213",
+    "port": 400,
+    "use_static": true,
+    "subnet": "255.255.255.0",
+    "gateway": "192.168.8.1",
+    "dns": "8.8.8.8",
+    "remote_ip": "192.168.8.100",
+    "remote_port": 4000
+}

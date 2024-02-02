@@ -1,0 +1,51 @@
+<!--
+ * @Author: liuao 2494210546@qq.com
+ * @Date: 2023-12-11 10:11:54
+ * @LastEditors: liuao 2494210546@qq.com
+ * @LastEditTime: 2023-12-13 15:50:41
+ * @FilePath: \K06-FireDoor-RTOS\test\README
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+-->
+
+This directory is intended for PlatformIO Test Runner and project tests.
+
+Unit Testing is a software testing method by which individual units of
+source code, sets of one or more MCU program modules together with associated
+control data, usage procedures, and operating procedures, are tested to
+determine whether they are fit for use. Unit testing finds problems early
+in the development cycle.
+
+More information about PlatformIO Unit Testing:
+- https://docs.platformio.org/en/latest/advanced/unit-testing/index.html
+
+
+4M
+# Name,   Type, SubType, Offset,  Size, Flags
+nvs,      data, nvs,     0x9000,  0x5000,
+otadata,  data, ota,     0xe000,  0x2000,
+app0,     app,  ota_0,   0x10000, 0x140000,
+app1,     app,  ota_1,   0x150000,0x140000,
+spiffs,   data, spiffs,  0x290000,0x90000,
+
+王子 16M
+nvs,      data, nvs,     0x9000,  0x5000,
+otadata,  data, ota,     0xe000,  0x2000,
+app0,     app,  ota_0,   0x10000, 0x770000,
+app1,     app,  ota_1,   0x780000,0x770000,
+spiffs,   data, spiffs,  0xEF0000,0x100000,
+coredump, data, coredump,0xFF0000,0x10000,
+
+修改 
+nvs,      data, nvs,     0x9000,  0x5000,
+otadata,  data, ota,     0xe000,  0x2000,
+app0,     app,  ota_0,   0x10000, 0x700000,
+app1,     app,  ota_1,   0x710000,0x700000,
+spiffs,   data, spiffs,  0xE10000,0x100000,
+coredump, data, coredump,0xF10000,0x10000,
+满量程
+nvs,      data, nvs,     0x9000,  0x5000,
+otadata,  data, ota,     0xe000,  0x2000,
+app0,     app,  ota_0,   0x10000, 0x700000,
+app1,     app,  ota_1,   0x710000,0x700000,
+spiffs,   data, spiffs,  0xE10000,0x100000,
+coredump, data, coredump,0xF10000,0xf0000,
