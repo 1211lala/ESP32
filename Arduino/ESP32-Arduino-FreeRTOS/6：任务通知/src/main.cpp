@@ -31,14 +31,13 @@ void setup()
  *********************************************************************************************/
 void os_task_fun_3(void *args)
 {
-    uint32_t value = 0;
+
     while (1)
     {
-        if (xTaskNotifyWait(0x00000000, 0xFFFFFFFF, &value, portMAX_DELAY) == pdTRUE)
+        if (ulTaskNotifyTake(pdTRUE, portMAX_DELAY) == pdTRUE)
         {
-            logoinfo("任务通知: os_task_fun_3 !!!  value = %d\r\n", value);
+            logoinfo("任务通知: os_task_fun_3 !!!\r\n");
         }
-        
     }
 }
 
@@ -47,11 +46,28 @@ void os_task_fun_3(void *args)
  *********************************************************************************************/
 void os_task_fun_2(void *args)
 {
+    uint32_t value = 0;
+    uint32_t e_value = 0;
     while (1)
     {
-        if (ulTaskNotifyTake(pdTRUE,portMAX_DELAY) == pdTRUE)
+        /* 当作事件组使用 */
+        xTaskNotifyWait(0x00000000, 0xffffffff, &value, portMAX_DELAY);
+        logoinfo("value = %d\r\n", value);
+        if (value & (1 << 3))
         {
-            logoinfo("任务通知: os_task_fun_2 !!!\r\n");
+            e_value |= (1 << 3);
+            logoinfo("任务通知: 1 << 3\r\n");
+        }
+        if (value & (1 << 4))
+        {
+            e_value |= (1 << 4);
+            logoinfo("任务通知: 1 << 4\r\n");
+            
+        }
+        if (e_value == ((1 << 3) | (1 << 4)))
+        {
+            e_value = 0;
+            logoinfo("任务通知: 1 << 3   |   1 << 4\r\n");
         }
     }
 }
@@ -59,29 +75,21 @@ void os_task_fun_2(void *args)
  * 任务功能:
  *********************************************************************************************/
 OneButton button(KEY, true);
-/**
- * #define xTaskNotify( xTaskToNotify, ulValue, eAction ) \
-    xTaskGenericNotify( ( xTaskToNotify ), ( tskDEFAULT_INDEX_TO_NOTIFY ), ( ulValue ), ( eAction ), NULL )
-#define xTaskNotifyGive( xTaskToNotify ) \
-    xTaskGenericNotify( ( xTaskToNotify ), ( tskDEFAULT_INDEX_TO_NOTIFY ), ( 0 ), eIncrement, NULL )
-*/
+
 void button_attachClick(void)
 {
-    // /* 当作二值信号量使用, 传入参数30无效 */
-    // xTaskNotify(os_handle_2, 30, eNoAction);
-    /* 当作计算信号量使用, 传入参数30无效, 每次会使任务通知的值加一 */
-    xTaskNotify(os_handle_2, 0, eIncrement);
-    // /* 当作事件组使用, 传入参数回和之前的参数进行或运算 */
-    // xTaskNotify(os_handle_2, (1 << 3) | (1 << 0), eSetBits);
+    xTaskNotify(os_handle_2, (1 << 3), eSetBits);
 }
 void button_attachDoubleClick(void)
 {
-
+    xTaskNotify(os_handle_2, (1 << 4), eSetBits);
 }
+
 void os_task_fun_1(void *args)
 {
     button.attachClick(button_attachClick);
     button.attachDoubleClick(button_attachDoubleClick);
+    button.setClickMs(300);
     while (1)
     {
         button.tick();

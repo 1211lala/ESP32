@@ -1,0 +1,9 @@
+{
+  "C_Cpp.intelliSenseEngine": "default",
+  "files.associations": {
+    "sdkconfig.h": "c",
+    "task.h": "c",
+    "freertos.h": "c",
+    "ledpin.h": "c"
+  }
+}
