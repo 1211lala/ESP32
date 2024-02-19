@@ -11,21 +11,31 @@
 
 
 TaskHandle_t task_adc_handle = NULL;
+TaskHandle_t task_led_handle = NULL;
 
 void task_adc(void *arg)
+{
+    onehost_adc_unit1_init();
+    while (1)
+    {
+        get_adc1_value();
+        vTaskDelay(400 / portTICK);
+    }
+}
+
+void task_led(void *arg)
 {
     led_general_init();
     while (1)
     {
-        get_adc1_value();
-        vTaskDelay(2000 / portTICK);
+        led_blink();
+        vTaskDelay(1000 / portTICK);
     }
 }
 
-
-
 void app_main(void)
 {
-    xTaskCreatePinnedToCore(task_adc, "task_adc", 1024 * 3, NULL, 2, &task_adc_handle, 1);
+    xTaskCreatePinnedToCore(task_adc, "task_adc", 1024 * 4, NULL, 2, &task_adc_handle, 1);
+    xTaskCreatePinnedToCore(task_led, "task_led", 1024 * 4, NULL, 2, &task_led_handle, 1);
     vTaskDelete(NULL);
 }
