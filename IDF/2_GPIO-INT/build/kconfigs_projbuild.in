@@ -1,6 +1,0 @@
-source "D:/SoftWare/ESP_IDF/esp_idf_v_5.1.1/esp-idf/components/bootloader/Kconfig.projbuild"
-source "D:/SoftWare/ESP_IDF/esp_idf_v_5.1.1/esp-idf/components/esp_app_format/Kconfig.projbuild"
-source "D:/SoftWare/ESP_IDF/esp_idf_v_5.1.1/esp-idf/components/esp_rom/Kconfig.projbuild"
-source "D:/SoftWare/ESP_IDF/esp_idf_v_5.1.1/esp-idf/components/esptool_py/Kconfig.projbuild"
-source "D:/SoftWare/ESP_IDF/esp_idf_v_5.1.1/esp-idf/components/partition_table/Kconfig.projbuild"
-source "E:/MY_CODE/ESP32/IDF/2_GPIO-INT/main/Kconfig.projbuild"
