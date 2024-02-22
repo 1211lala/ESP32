@@ -11,10 +11,24 @@ void sht20_task(void *pvParameters)
 {
     sht20_init(100000);
     float temp = 0;
+    float hum = 0;
+    uint8_t flag = 0;
     while (1)
     {
-        sht20_get_temp(&temp);
-        ESP_LOGI("TEMP", "%.2fC", temp);
+        flag = 0;
+        if (sht20_get_temp(&temp) != ESP_OK)
+        {
+            flag = 1;
+        }
+        if (sht20_get_hum(&hum) != ESP_OK)
+        {
+            flag = 1;
+        }
+        if (flag == 0)
+        {
+            ESP_LOGI("SHT20", "HUM: %.2f%% TEMP: %.2fC", hum, temp);
+        }
+
         vTaskDelay(1000 / portTICK);
     }
 }
