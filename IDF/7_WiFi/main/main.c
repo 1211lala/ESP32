@@ -58,8 +58,12 @@ void app_main()
     esp_wifi_init(&cfg);
 
     wifi_sta_config_t cfg_sta = {
-        .ssid = "Kean",
-        .password = "Kean.2023",
+        // .ssid = "Kean",
+        // .password = "Kean.2023",
+
+        .ssid = "Xiaomi_4C",
+        .password = "121314liuAO#",
+
     };
     esp_wifi_set_config(WIFI_IF_STA, (wifi_config_t *)&cfg_sta);
 
