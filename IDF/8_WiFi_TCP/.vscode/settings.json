@@ -1,7 +1,7 @@
 {
   "C_Cpp.intelliSenseEngine": "default",
   "idf.flashType": "UART",
-  "idf.portWin": "COM24",
+  "idf.portWin": "COM26",
   "idf.adapterTargetName": "esp32",
   "files.associations": {
     "bspled.h": "c",
@@ -37,6 +37,13 @@
     "string": "c",
     "string_view": "c",
     "esp_wifi.h": "c",
-    "p_wifi_sta.h": "c"
+    "p_wifi_sta.h": "c",
+    "netdb.h": "c",
+    "esp_event_loop.h": "c",
+    "*.tcc": "c",
+    "fstream": "c",
+    "ostream": "c",
+    "esp_netif_ip_addr.h": "c",
+    "cerrno": "c"
   }
 }
