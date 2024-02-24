@@ -31,34 +31,20 @@ void wifi_event_handler(void *arg, esp_event_base_t event_base, int32_t event_id
 
 void task_tcp(void *arg)
 {
+    uint32_t sockfd = wifi_tcp_client_init("192.168.31.125", 8000);
 
-    int sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
-    if (sockfd < 0)
-    {
-        ESP_LOGE("Socket", "创建失败\n");
-    }
-    // 定义一个sockaddr_in的地址结构体
-    struct sockaddr_in serverAddress;
-    // IPV4协议
-    serverAddress.sin_family = AF_INET;
-    // ip地址转换，将点分十进制转换成二进制整数，这里的"192.168.191.1"为所连接的主机的IP地址
-    inet_pton(AF_INET, "192.168.8.100", &serverAddress.sin_addr.s_addr);
-    // 端口
-    serverAddress.sin_port = htons(8080);
-    // 和TCP服务器建立连接，当TCP调用connect时就会调用一个三次握手过程
-    int rc = connect(sockfd, (struct sockaddr *)&serverAddress, sizeof(struct sockaddr_in));
-    if (rc != 0)
-    {
-        ESP_LOGE("Socket", "连接失败");
-    }
-
-    char *data = "Hello world\r\n"; // 要发送的数据
-
+    int len = 0;
+    char *rx_buffer = (char *)malloc(100);
     while (1)
     {
-        rc = send(sockfd, data, strlen(data), 0); // 发送数据
-        ESP_LOGI("TAG", "send len: %d", rc);
-        vTaskDelay(1000 / portTICK);
+        len = recv(sockfd, rx_buffer, 100, MSG_DONTWAIT);
+        if (len > 0)
+        {
+            rx_buffer[len] = '\0';
+            len = send(sockfd, rx_buffer, strlen(rx_buffer), 0);
+            ESP_LOGI("LOG", "%s", rx_buffer);
+        }
+        vTaskDelay(50 / portTICK);
     }
     close(sockfd);
 }
