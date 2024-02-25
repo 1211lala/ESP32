@@ -85,3 +85,35 @@ void wifi_sta_init(struct WiFi_Param *WiFi_Config, esp_event_handler_t esp_event
         ESP_LOGI("TAG", "Failed to connect to SSID:%s, password:%s", wp.ssid, wp.password);
     }
 }
+
+/******************************************************************************
+ * 函数描述: TCP客户端初始化
+ * 参  数1: 服务端TCP的IP
+ * 参  数2: 服务端的端口
+ * 返  回3: 返回tcp的ID
+ *******************************************************************************/
+uint32_t wifi_tcp_client_init(const char *ip, uint16_t port)
+{
+    int sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
+    if (sockfd < 0)
+    {
+        ESP_LOGE("Socket", "创建失败");
+        return sockfd;
+    }
+    // 定义一个sockaddr_in的地址结构体
+    struct sockaddr_in serverAddress;
+    // IPV4协议
+    serverAddress.sin_family = AF_INET;
+    // ip地址转换，将点分十进制转换成二进制整数
+    inet_pton(AF_INET, ip, &serverAddress.sin_addr.s_addr);
+    // 端口
+    serverAddress.sin_port = htons(port);
+    // 和TCP服务器建立连接，当TCP调用connect时就会调用一个三次握手过程
+    int rc = connect(sockfd, (struct sockaddr *)&serverAddress, sizeof(struct sockaddr_in));
+    if (rc != 0)
+    {
+        ESP_LOGE("Socket", "连接失败");
+        return rc;
+    }
+    return sockfd;
+}

@@ -1,7 +1,7 @@
 {
   "C_Cpp.intelliSenseEngine": "default",
   "idf.flashType": "UART",
-  "idf.portWin": "COM26",
+  "idf.portWin": "COM15",
   "idf.adapterTargetName": "esp32",
   "files.associations": {
     "bspled.h": "c",
@@ -44,6 +44,11 @@
     "ws2tcpip.h": "c",
     "in.h": "c",
     "socket.h": "c",
-    "p_wifi_ap.h": "c"
+    "p_wifi_ap.h": "c",
+    "err.h": "c",
+    "esp_spiffs.h": "c",
+    "spiffs.h": "c",
+    "stdbool.h": "c",
+    "unistd.h": "c"
   }
 }
