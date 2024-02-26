@@ -7,6 +7,7 @@
 #include "p_gpttim.h"
 #include "p_i2c_sht20.h"
 #include "p_wifi_sta.h"
+#include "spiffs.h"
 
 TaskHandle_t wifi_handle;
 void wifi_event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
@@ -72,6 +73,8 @@ void task_wifi(void *arg)
 void app_main()
 {
     led_init();
+    spiffs_mount();
+    spiffs_scan();
     wifi_sta_init(&wp, wifi_event_handler);
     xTaskCreate(task_wifi, "task_wifi", 1024 * 4, NULL, 5, &wifi_handle);
 }
