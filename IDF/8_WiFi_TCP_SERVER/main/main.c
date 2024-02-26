@@ -47,21 +47,51 @@ void wifi_event_handler(void *arg, esp_event_base_t event_base, int32_t event_id
 
 void task_tcp(void *arg)
 {
-    uint32_t sockfd = wifi_tcp_client_init("192.168.31.125", 8080);
 
-    int len = 0;
+    uint8_t flag = 0;
+    int connect_sock = 0;
+
     char *rx_buffer = (char *)malloc(100);
+
+    uint32_t sockfd = wifi_tcp_server_init("192.168.8.100", 8080);
+
+    struct sockaddr_in6 source_addr;
+    socklen_t addr_len = sizeof(source_addr);
+
     while (1)
     {
-        len = recv(sockfd, rx_buffer, 100, MSG_DONTWAIT);
-        if (len > 0)
+        if (flag == 0)
         {
-            rx_buffer[len] = '\0';
-            len = send(sockfd, rx_buffer, strlen(rx_buffer), 0);
-            ESP_LOGI("LOG", "%s", rx_buffer);
+            flag = 1;
+            connect_sock = accept(sockfd, (struct sockaddr *)&source_addr, &addr_len);
+            if (connect_sock < 0)
+            {
+                ESP_LOGE("TCP_Server", "建立连接失败");
+                close(sockfd);
+            }
         }
-        vTaskDelay(50 / portTICK);
+        else
+        {
+            memset(rx_buffer, 0, 100);
+            int len = recv(connect_sock, rx_buffer, 100, 0);
+            if (len < 0)
+            {
+                ESP_LOGE("TCP_Server", "有错误发生在接收期间！！！ CODE(%d)", errno);
+            }
+            else if (len == 0)
+            {
+                ESP_LOGW("TCP_Server", "连接断开");
+                close(connect_sock);
+                flag = 0;
+            }
+            else
+            {
+                ESP_LOGI("TCP_Server", "收到 %d bytes: %s", len, rx_buffer);
+                send(connect_sock, rx_buffer, len, 0);
+            }
+        }
     }
+    close(connect_sock);
     close(sockfd);
 }
 
@@ -70,4 +100,9 @@ void app_main()
     led_init();
     wifi_sta_init(&wp, wifi_event_handler);
     xTaskCreate(task_tcp, "task_tcp", 1024 * 4, NULL, 5, &wifi_handle);
+    while (1)
+    {
+        led_blink();
+        vTaskDelay(100);
+    }
 }

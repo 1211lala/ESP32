@@ -14,6 +14,10 @@ struct WiFi_Param
 {
     char *ssid;
     char *password;
+    char *ip;
+    char *gateway;
+    char *subnet;
+
 };
 
 extern struct WiFi_Param wp;

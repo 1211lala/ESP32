@@ -3,18 +3,18 @@
 EventGroupHandle_t s_wifi_event_group = NULL;
 
 struct WiFi_Param wp = {
-    // .ssid = "Kean",
-    // .password = "Kean.2023",
-    // .ip = "192.168.8.188",
-    // .gateway = "192.168.8.1",
-    // .subnet = "255.255.255.0",
-    // .dns = "114.114.114.114",
-    .ssid = "Xiaomi_4C",
-    .password = "121314liuAO#",
-    .ip = "192.168.31.188",
-    .gateway = "192.168.31.1",
+    .ssid = "Kean",
+    .password = "Kean.2023",
+    .ip = "192.168.8.188",
+    .gateway = "192.168.8.1",
     .subnet = "255.255.255.0",
     .dns = "114.114.114.114",
+    // .ssid = "Xiaomi_4C",
+    // .password = "121314liuAO#",
+    // .ip = "192.168.31.188",
+    // .gateway = "192.168.31.1",
+    // .subnet = "255.255.255.0",
+    // .dns = "114.114.114.114",
 };
 
 void wifi_sta_init(struct WiFi_Param *WiFi_Config, esp_event_handler_t esp_event_callback)
@@ -78,42 +78,46 @@ void wifi_sta_init(struct WiFi_Param *WiFi_Config, esp_event_handler_t esp_event
     EventBits_t bits = xEventGroupWaitBits(s_wifi_event_group, WIFI_CONNECTED_BIT | WIFI_FAIL_BIT, pdFALSE, pdFALSE, portMAX_DELAY);
     if (bits & WIFI_CONNECTED_BIT)
     {
-        ESP_LOGI("TAG", "connected to ap SSID:%s password:%s", wp.ssid, wp.password);
+        ESP_LOGI("WIFI", "connected to ap SSID:%s password:%s", wp.ssid, wp.password);
     }
     else if (bits & WIFI_FAIL_BIT)
     {
-        ESP_LOGI("TAG", "Failed to connect to SSID:%s, password:%s", wp.ssid, wp.password);
+        ESP_LOGI("WIFI", "Failed to connect to SSID:%s, password:%s", wp.ssid, wp.password);
     }
 }
 
 /******************************************************************************
- * 函数描述: TCP客户端初始化
+ * 函数描述: TCP客户端初始化，使用IPV4
  * 参  数1: 服务端TCP的IP
  * 参  数2: 服务端的端口
  * 返  回3: 返回tcp的ID
  *******************************************************************************/
-uint32_t wifi_tcp_client_init(const char *ip, uint16_t port)
+uint32_t wifi_tcp_server_init(const char *ip, uint16_t port)
 {
+
     int sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
     if (sockfd < 0)
     {
-        ESP_LOGE("Socket", "创建失败");
+        ESP_LOGE("TCP_Server", "创建失败");
         return sockfd;
     }
-    // 定义一个sockaddr_in的地址结构体
+    ESP_LOGI("TCP_Server", "socket创建成功,将监听 %s:%d", ip, port);
+    /* 设置TCP的IP和端口和IPV4版本 */
     struct sockaddr_in serverAddress;
-    // IPV4协议
     serverAddress.sin_family = AF_INET;
-    // ip地址转换，将点分十进制转换成二进制整数
-    inet_pton(AF_INET, ip, &serverAddress.sin_addr.s_addr);
-    // 端口
+    serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);
     serverAddress.sin_port = htons(port);
-    // 和TCP服务器建立连接，当TCP调用connect时就会调用一个三次握手过程
-    int rc = connect(sockfd, (struct sockaddr *)&serverAddress, sizeof(struct sockaddr_in));
-    if (rc != 0)
+    int err = bind(sockfd, (struct sockaddr *)&serverAddress, sizeof(serverAddress));
+    if (err != 0)
     {
-        ESP_LOGE("Socket", "连接失败");
-        return rc;
+        ESP_LOGE("TCP_Server", "socket绑定失败!!!   CODE(%d)", err);
+        return err;
+    }
+    err = listen(sockfd, 1);
+    if (err != 0)
+    {
+        ESP_LOGE("TCP_Server", "在监听期间发生错误!!!   CODE(%d)", err);
+        return err;
     }
     return sockfd;
 }
