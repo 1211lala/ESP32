@@ -71,7 +71,6 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
     case HTTP_EVENT_ON_DATA:
         ESP_LOGI(TAG, "接收数据事件, len=%d", evt->data_len);
 
-        ESP_LOGI("TAG", "%s\n", local_response_buffer);
         if (!esp_http_client_is_chunked_response(evt->client))
         {
             printf("%.*s", evt->data_len, (char *)evt->data);
@@ -141,7 +140,8 @@ void task_key(void *arg)
         {
             if (flag == 0)
             {
-                http_request("http://v1.yiketianqi.com/api?unescape=1&version=v61&appid=88344185&appsecret=58ixdwXt");
+                // http_request("http://v1.yiketianqi.com/api?unescape=1&version=v61&appid=88344185&appsecret=58ixdwXt");
+                http_request("https://example.com/");
                 flag = 1;
             }
             else if (flag == 1)
