@@ -48,50 +48,118 @@ void wifi_event_handler(void *arg, esp_event_base_t event_base, int32_t event_id
     }
 }
 
+/*
+    流程：创建JSON结构体 --> 添加数据 --> 释放内存
+    流程：判断JSON格式 --> 解析数据 --> 释放内存
+
+*/
 void task_json(void *arg)
 {
-    cJSON *pRoot = cJSON_CreateObject();  // 创建JSON根部结构体
-    cJSON *pValue = cJSON_CreateObject(); // 创建JSON子叶结构体
+    /***************************************构建数据************************************************/
+    // 创建父对象
+    cJSON *pRoot = cJSON_CreateObject();
+    // 在父对象根目录添加字符串数据
+    cJSON_AddStringToObject(pRoot, "ssid", wp.ssid);
+    cJSON_AddStringToObject(pRoot, "password", wp.password);
+    // 在父对象根目录添加整型数据
+    cJSON_AddNumberToObject(pRoot, "port", 2000);
+    // 在父对象根目录添加整型数组
+    int array[5] = {51, 15, 63, 22, 96};
+    cJSON *pIntArray = cJSON_CreateIntArray(array, 5);
+    cJSON_AddItemToObject(pRoot, "IntArray", pIntArray);
+    // 在父对象根目录添加子对象
+    cJSON *object = cJSON_CreateObject();
+    cJSON_AddStringToObject(object, "ip", wp.ip);
+    cJSON_AddStringToObject(object, "gateway", wp.gateway);
+    cJSON_AddStringToObject(object, "subnet", wp.subnet);
+    cJSON_AddItemToObject(pRoot, "ip_info", object);
+    // 在父对象根目录添JSON数组,并在数组中新建两个子对象
+    cJSON *jsonArray = cJSON_CreateArray();
+    cJSON *pArray1 = cJSON_CreateObject();
+    cJSON_AddStringToObject(pArray1, "name", "liuao");
+    cJSON_AddNumberToObject(pArray1, "year", 18);
+    cJSON_AddItemToArray(jsonArray, pArray1);
+    cJSON *pArray2 = cJSON_CreateObject();
+    cJSON_AddStringToObject(pArray2, "name", "xiaoming");
+    cJSON_AddNumberToObject(pArray2, "year", 18);
+    cJSON_AddItemToArray(jsonArray, pArray2);
+    cJSON_AddItemToObject(pRoot, "info", jsonArray);
+    // 获取格式化好的JSON字符串
+    char *Json_string = cJSON_Print(pRoot);
+    printf("%s\n", Json_string);
 
-    cJSON_AddStringToObject(pRoot, "mac", "65:c6:3a:b2:33:c8"); // 添加字符串类型数据到根部结构体
-    cJSON_AddItemToObject(pRoot, "value", pValue);
-    cJSON_AddStringToObject(pValue, "day", "Sunday"); // 添加字符串类型数据到子叶结构体
-    cJSON_AddNumberToObject(pRoot, "number", 2);      // 添加整型数据到根部结构体
-
-    int hex[5] = {51, 15, 63, 22, 96};
-    cJSON *pHex = cJSON_CreateIntArray(hex, 5); // 创建整型数组类型结构体
-    cJSON_AddItemToObject(pRoot, "hex", pHex);  // 添加整型数组到数组类型结构体
-
-    cJSON *pArray = cJSON_CreateArray();                  // 创建数组类型结构体
-    cJSON_AddItemToObject(pRoot, "info", pArray);         // 添加数组到根部结构体
-    cJSON *pArray_relay = cJSON_CreateObject();           // 创建JSON子叶结构体
-    cJSON_AddItemToArray(pArray, pArray_relay);           // 添加子叶结构体到数组结构体
-    cJSON_AddStringToObject(pArray_relay, "relay", "on"); // 添加字符串类型数据到子叶结构体
-
-    char *sendData = cJSON_Print(pRoot); // 从cJSON对象中获取有格式的JSON对象
-    printf("data:%s\n", sendData);       // 打印数据
-
-    // receiveData是要剖析的数据
+    /***************************************解析数据************************************************/
     // 首先整体判断是否为一个json格式的数据
-    cJSON *pJsonRoot = cJSON_Parse(sendData);
+    cJSON *pJsonAddress = NULL;
+    cJSON *pJsonRoot = cJSON_Parse(Json_string);
     // 如果是否json格式数据
     if (pJsonRoot != NULL)
     {
-
-        char bssid[23] = {0};
-        cJSON *pMacAdress = cJSON_GetObjectItem(pJsonRoot, "mac"); // 解析mac字段字符串内容
-        if (!pMacAdress)
-            return; // 判断mac字段是否json格式
+        pJsonAddress = cJSON_GetObjectItem(pJsonRoot, "ssid");
+        if (!pJsonAddress)
+            ESP_LOGE("JSON", "JSON中没有此对象");
+        else
+        { // 判断JSON的对象是否为String
+            if (cJSON_IsString(pJsonAddress))
+            {
+                printf("ssid: %s\r\n", pJsonAddress->valuestring);
+            }
+        } // 下面不再做错误判断
+        pJsonAddress = cJSON_GetObjectItem(pJsonRoot, "password");
+        printf("password: %s\r\n", pJsonAddress->valuestring);
+        pJsonAddress = cJSON_GetObjectItem(pJsonRoot, "port");
+        printf("port: %d\r\n", pJsonAddress->valueint);
+        //
+        pJsonAddress = cJSON_GetObjectItem(pJsonRoot, "IntArray");
+        if (!pJsonAddress)
+            return;
         else
         {
-            if (cJSON_IsString(pMacAdress)) // 判断mac字段是否string类型
+            int len = cJSON_GetArraySize(pJsonAddress);
+            for (uint8_t i = 0; i < len; i++)
             {
-                strcpy(bssid, pMacAdress->valuestring); // 拷贝内容到字符串数组
-                printf("mac: %s", bssid);
+                printf("IntArray[%d] = %d\r\n", i, cJSON_GetArrayItem(pJsonAddress, i)->valueint);
+            }
+        }
+
+        pJsonAddress = cJSON_GetObjectItem(pJsonRoot, "ip_info");
+        if (!pJsonAddress)
+            return;
+        else
+        {
+            cJSON *address = cJSON_GetObjectItem(pJsonAddress, "ip");
+            if (cJSON_IsString(address))
+            {
+                printf("ip: %s\r\n", address->valuestring);
+            } // 不再做数据类型判断
+            address = cJSON_GetObjectItem(pJsonAddress, "gateway");
+            printf("gateway: %s\r\n", address->valuestring);
+            address = cJSON_GetObjectItem(pJsonAddress, "subnet");
+            printf("subnet: %s\r\n", address->valuestring);
+        }
+
+        pJsonAddress = cJSON_GetObjectItem(pJsonRoot, "info");
+        if (!pJsonAddress)
+            return;
+        else
+        {
+            cJSON *jsonAddress;
+            cJSON *jsonData;
+            int len = cJSON_GetArraySize(pJsonAddress);
+            printf("JSON共有%d数据对象\r\n", len);
+            for (uint8_t i = 0; i < len; i++)
+            {
+                jsonAddress = cJSON_GetArrayItem(pJsonAddress, i);
+
+                jsonData = cJSON_GetObjectItem(jsonAddress, "name");
+                printf("name: %s\r\n", jsonData->valuestring);
+                jsonData = cJSON_GetObjectItem(jsonAddress, "year");
+                printf("year: %d\r\n", jsonData->valueint);
             }
         }
     }
-
+    cJSON_free((void *)Json_string);
+    cJSON_Delete(pRoot);
     while (1)
     {
         vTaskDelay(1000 / portTICK);
@@ -103,6 +171,6 @@ void app_main()
 {
     led_init();
     spiffs_mount();
-    wifi_sta_init(&wp, wifi_event_handler);
+    // wifi_sta_init(&wp, wifi_event_handler);
     xTaskCreate(task_json, "task_json", 1024 * 4, NULL, 5, &wifi_handle);
 }
