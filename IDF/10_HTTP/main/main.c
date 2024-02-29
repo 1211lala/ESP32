@@ -12,7 +12,8 @@
 #include "cJSON.h"
 #include "esp_http_client.h"
 
-TaskHandle_t wifi_handle;
+TaskHandle_t wifi_handle = NULL;
+
 void wifi_event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
 {
     static int s_retry_num = 0;
@@ -26,9 +27,9 @@ void wifi_event_handler(void *arg, esp_event_base_t event_base, int32_t event_id
     {
         ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
 
-        ESP_LOGI("WIFI", "Got IP: " IPSTR, IP2STR(&event->ip_info.ip));
-        ESP_LOGI("WIFI", "Got GW: " IPSTR, IP2STR(&event->ip_info.gw));
-        ESP_LOGI("WIFI", "Got NT: " IPSTR, IP2STR(&event->ip_info.netmask));
+        ESP_LOGI("WIFI", "STA-IP: " IPSTR, IP2STR(&event->ip_info.ip));
+        ESP_LOGI("WIFI", "STA-GATEWAY: " IPSTR, IP2STR(&event->ip_info.gw));
+        ESP_LOGI("WIFI", "STA-SUBNET: " IPSTR, IP2STR(&event->ip_info.netmask));
 
         xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
     }
@@ -39,16 +40,16 @@ void wifi_event_handler(void *arg, esp_event_base_t event_base, int32_t event_id
         {
             esp_wifi_connect();
             s_retry_num++;
-            ESP_LOGI("WIFI", "retry to connect to the AP");
+            ESP_LOGI("WIFI", "连接失败,开始重新连接...");
         }
         else
         {
             xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
         }
-        ESP_LOGI("WIFI", "connect to the AP fail");
+        ESP_LOGE("WIFI", "连接失败!!!");
     }
 }
-char local_response_buffer[1000] = {0};
+
 esp_err_t _http_event_handler(esp_http_client_event_t *evt)
 {
     char *TAG = "HTTP";
@@ -70,10 +71,24 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
         break;
     case HTTP_EVENT_ON_DATA:
         ESP_LOGI(TAG, "接收数据事件, len=%d", evt->data_len);
-
+        // 检查是不是分块发送
         if (!esp_http_client_is_chunked_response(evt->client))
         {
-            printf("%.*s", evt->data_len, (char *)evt->data);
+            printf("%.*s\r\n", evt->data_len, (char *)evt->data);
+
+            // cJSON *pJsonAddress = NULL;
+            // cJSON *pJsonRoot = cJSON_Parse((char *)evt->data);
+            // pJsonAddress = cJSON_GetObjectItem(pJsonRoot, "code");
+            // printf("code = %d\n", pJsonAddress->valueint);
+            // pJsonAddress = cJSON_GetObjectItem(pJsonRoot, "msg");
+            // printf("msg = %s\n", pJsonAddress->valuestring);
+
+            // pJsonAddress = cJSON_GetObjectItem(pJsonRoot, "data");
+            // cJSON *nextAddress = cJSON_GetObjectItem(pJsonAddress, "state");
+            // printf("state = %d\n", nextAddress->valueint);
+            // nextAddress = cJSON_GetObjectItem(pJsonAddress, "angle");
+            // printf("angle = %d\n", nextAddress->valueint);
+            // cJSON_Delete(pJsonRoot);
         }
         break;
     case HTTP_EVENT_ON_FINISH:
@@ -89,48 +104,29 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
     return ESP_OK;
 }
 
-/*
-
-Allow potentially insecure options
-
-Skip server certificate verification by default (WARNING: ONLY FOR TESTING PURPOSE, READ HELP)
-
-*/
-void task_http(void *arg)
-{
-
-    while (1)
-    {
-        vTaskDelay(1000 / portTICK);
-        led_blink();
-    }
-}
-
 void http_request(char *url)
 {
-
     esp_http_client_config_t config = {
 
         .method = HTTP_METHOD_GET,
         .url = url,
         .event_handler = _http_event_handler,
-        .user_data = local_response_buffer,
         .buffer_size = 2048,
     };
     esp_http_client_handle_t client = esp_http_client_init(&config);
-    // GET
+
     esp_err_t err = esp_http_client_perform(client);
     if (err == ESP_OK)
     {
-        ESP_LOGI("TAG", "HTTP请求成功  CODE = %d, LEN = %llu", esp_http_client_get_status_code(client), esp_http_client_get_content_length(client));
+        ESP_LOGI("HTTP", "请求成功  CODE = %d, LEN = %llu", esp_http_client_get_status_code(client), esp_http_client_get_content_length(client));
     }
     else
     {
-        ESP_LOGE("TAG", "HTTP请求失败: %s", esp_err_to_name(err));
+        ESP_LOGE("HTTP", "请求失败: %s", esp_err_to_name(err));
     }
     esp_http_client_cleanup(client);
 }
-void task_key(void *arg)
+void task_http(void *arg)
 {
     int flag = 0;
     while (1)
@@ -140,17 +136,27 @@ void task_key(void *arg)
         {
             if (flag == 0)
             {
-                // http_request("http://v1.yiketianqi.com/api?unescape=1&version=v61&appid=88344185&appsecret=58ixdwXt");
-                http_request("https://example.com/");
+                http_request("http://192.168.8.93:8080/get_firedoor_data");
                 flag = 1;
             }
             else if (flag == 1)
             {
-                http_request("http://192.168.8.93:8080/get_software_version");
+                http_request("https://baidu.com/");
+
                 flag = 0;
             }
         }
         vTaskDelay(50 / portTICK);
+    }
+}
+
+void task_led(void *arg)
+{
+
+    while (1)
+    {
+        vTaskDelay(1000 / portTICK);
+        led_blink();
     }
 }
 void app_main()
@@ -159,6 +165,6 @@ void app_main()
     key_general_init();
     spiffs_mount();
     wifi_sta_init(&wp, wifi_event_handler);
-    xTaskCreate(task_http, "task_http", 1024 * 4, NULL, 5, &wifi_handle);
-    xTaskCreate(task_key, "task_key", 1024 * 8, NULL, 10, &wifi_handle);
+    xTaskCreate(task_led, "task_led", 1024 * 4, NULL, 5, &wifi_handle);
+    xTaskCreate(task_http, "task_http", 1024 * 8, NULL, 10, &wifi_handle);
 }
