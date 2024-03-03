@@ -44,6 +44,7 @@
     "ws2tcpip.h": "c",
     "in.h": "c",
     "socket.h": "c",
-    "event_groups.h": "c"
+    "event_groups.h": "c",
+    "spiffs.h": "c"
   }
 }

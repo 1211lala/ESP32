@@ -48,23 +48,24 @@ void wifi_event_handler(void *arg, esp_event_base_t event_base, int32_t event_id
 
 void task_wifi(void *arg)
 {
+    // wifi_config_t config;
+    // esp_wifi_get_config(WIFI_IF_STA, &config);
+    // printf("ssid: %s  ", (char *)config.sta.ssid);
+    // printf("password: %s\r\n", (char *)config.sta.password);
+
+    // esp_netif_ip_info_t ip_info;
+    // esp_netif_t *netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
+    // esp_netif_get_ip_info(netif, &ip_info);
+    // printf("IP: " IPSTR " ", IP2STR(&ip_info.ip));
+    // printf("Mask: " IPSTR " ", IP2STR(&ip_info.netmask));
+    // printf("Gw: " IPSTR "\n", IP2STR(&ip_info.gw));
+
+    // esp_netif_dns_info_t dsn_info;
+    // esp_netif_get_dns_info(netif, ESP_NETIF_DNS_MAIN, &dsn_info);
+    // printf("dns: " IPSTR "\n", IP2STR(&dsn_info.ip.u_addr.ip4));
     while (1)
     {
-        wifi_config_t config;
-        esp_wifi_get_config(WIFI_IF_STA, &config);
-        printf("ssid: %s  ", (char *)config.sta.ssid);
-        printf("password: %s\r\n", (char *)config.sta.password);
 
-        esp_netif_ip_info_t ip_info;
-        esp_netif_t *netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
-        esp_netif_get_ip_info(netif, &ip_info);
-        printf("IP: " IPSTR " ", IP2STR(&ip_info.ip));
-        printf("Mask: " IPSTR " ", IP2STR(&ip_info.netmask));
-        printf("Gw: " IPSTR "\n", IP2STR(&ip_info.gw));
-
-        esp_netif_dns_info_t dsn_info;
-        esp_netif_get_dns_info(netif, ESP_NETIF_DNS_MAIN, &dsn_info);
-        printf("dns: " IPSTR "\n", IP2STR(&dsn_info.ip.u_addr.ip4));
         vTaskDelay(1000 / portTICK);
         led_blink();
     }
@@ -74,7 +75,7 @@ void app_main()
 {
     led_init();
     spiffs_mount();
-    spiffs_scan();
-    wifi_sta_init(&wp, wifi_event_handler);
+
+    printf("文件大小为:%d\r\n", isExist("/spiffs/p_uart.c"));
     xTaskCreate(task_wifi, "task_wifi", 1024 * 4, NULL, 5, &wifi_handle);
 }

@@ -62,22 +62,55 @@ static esp_err_t http_hello_get_handler(httpd_req_t *req)
         buf = malloc(buf_len);
         if (httpd_req_get_hdr_value_str(req, "Host", buf, buf_len) == ESP_OK)
         {
-
-            ESP_LOGI(TAG, "Found header => Host: %s", buf);
+            ESP_LOGI(TAG, "请求头 => Host: %s", buf);
         }
         free(buf);
     }
-    const char *resp_str = (const char *)req->user_ctx;
-    httpd_resp_send(req, resp_str, strlen(resp_str));
+
+FILE *file = fopen("/spiffs/html.html", "r");
+if (file == NULL) {
+    ESP_LOGE("SPIFFS", "文件打开失败");
+}
+
+// 获取文件大小
+fseek(file, 0, SEEK_END);
+long file_size = ftell(file);
+fseek(file, 0, SEEK_SET);
+
+// 分配内存并读取文件内容
+char *read_str = malloc(file_size + 1);
+if (read_str == NULL) {
+    ESP_LOGE("SPIFFS", "内存分配失败");
+    fclose(file);
+}
+
+size_t bytes_read = fread(read_str, 1, file_size, file);
+if (bytes_read != file_size) {
+    ESP_LOGE("SPIFFS", "读取文件失败");
+    fclose(file);
+    free(read_str);
+}
+read_str[file_size] = '\0'; // 添加 NULL 终止符
+
+// 打印文件大小和读取到的字符串
+printf("%ld %s\r\n", file_size, read_str);
+
+// 发送 HTTP 响应
+httpd_resp_send(req, read_str, file_size);
+
+// 关闭文件并释放内存
+fclose(file);
+free(read_str);
+
 
     if (httpd_req_get_hdr_value_len(req, "Host") == 0)
     {
-        ESP_LOGI(TAG, "Request headers lost");
+        ESP_LOGI(TAG, "请求已断开");
     }
     return ESP_OK;
 }
 static const httpd_uri_t hello = {
-    .uri = "/hello",
+    .uri = "/",
     .method = HTTP_GET,
     .handler = http_hello_get_handler,
     .user_ctx = "Hello World!"};

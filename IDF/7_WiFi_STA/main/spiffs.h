@@ -14,5 +14,6 @@ extern esp_vfs_spiffs_conf_t conf;
 
 void spiffs_mount(void);
 void spiffs_scan(void);
+int isExist(const char *path);
 #endif
 

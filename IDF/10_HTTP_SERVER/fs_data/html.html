@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 HTTP SERVER</title>
+</head>
+
+<body>
+    <h1>ESP32 HTTP SERVER</h1>
+    <p>#ifndef _P_ADC_H_ <br>
+        #define _P_ADC_H_<br>
+        <br>
+        #include "common.h"<br>
+        <br>
+        #include "esp_adc/adc_oneshot.h"<br>
+        #include "esp_adc/adc_cali.h"<br>
+        #include "esp_adc/adc_cali_scheme.h"<br>
+        <br>
+        bool example_adc_calibration_init(adc_unit_t unit, adc_channel_t channel, adc_atten_t atten,
+        adc_cali_handle_t*out_handle);<br>
+        void example_adc_calibration_deinit(adc_cali_handle_t handle);<br>
+        void onehost_adc_unit1_init(void);<br>
+        void get_adc1_value(void);<br>
+        <br>
+        #endif
+    </p>
+</body>
+
+</html>

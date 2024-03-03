@@ -1,12 +1,12 @@
 #include "spiffs.h"
 
+static const char *TAG = "spiffs";
+
 esp_vfs_spiffs_conf_t conf = {
     .base_path = "/spiffs",
     .partition_label = NULL,
     .max_files = 5,
     .format_if_mount_failed = true};
-
-static char *TAG = "spiffs";
 
 void spiffs_mount(void)
 {
@@ -37,8 +37,9 @@ void spiffs_mount(void)
     }
     else
     {
-        ESP_LOGI(TAG, "分区大小为%dK, used: %dK", total / 1024, used / 1024);
+        ESP_LOGI(TAG, "SPIFFS分区大小为%dK, 已使用: %dK", total / 1024, used / 1024);
     }
+    spiffs_scan();
 }
 
 void spiffs_scan(void)
@@ -66,4 +67,29 @@ void spiffs_scan(void)
         }
     }
     closedir(dir);
+}
+
+/******************************************************************************
+ * 函数描述: 检测文件是否存在
+ * 参  数1: 文件路径
+ * 返  回:  文件的大小/ (-1 不存在)
+ * st_size：文件的大小（以字节为单位）
+ * st_mode：文件的类型和权限。
+ * st_uid：文件的所有者的用户 ID。
+ * st_atime：文件的最后访问时间。
+ * st_mtime：文件的最后修改时间。
+ *******************************************************************************/
+int isExist(const char *path)
+{
+    struct stat st;
+    if (stat(path, &st) != F_OK)
+    {
+        ESP_LOGE(TAG, "%s不存在", path);
+    }
+    return st.st_size;
+}
+
+int fs_read(const char *path, char *buffer, uint32_t size)
+{
+    
 }
