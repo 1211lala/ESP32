@@ -90,15 +90,20 @@ int isExist(const char *path)
     return st.st_size;
 }
 /******************************************************************************
- * 函数描述: 读取文件内容z
+ * 函数描述: 读取文件内容
  * 参  数1: 文件路径
  * 参  数2: 缓存buffer
- * 参  数3: buffer大小
  * 返  回:  实际读取的字节数(字节)
  *******************************************************************************/
-int fs_read(const char *path, char *buffer, uint32_t size)
+int fs_read(const char *path, char *buffer)
 {
-    int len = 0;
+    int readSize = 0;
+    int fileSize = 0;
+    fileSize = isExist(path);
+    if (fileSize < 0)
+    {
+        return -1;
+    }
     FILE *file = fopen(path, "r");
     if (file == NULL)
     {
@@ -108,8 +113,31 @@ int fs_read(const char *path, char *buffer, uint32_t size)
     }
     else
     {
-        len = fread(buffer, 1, size, file);
+        readSize = fread(buffer, sizeof(char), fileSize, file);
     }
     fclose(file);
-    return len;
+    return readSize;
+}
+/******************************************************************************
+ * 函数描述: 向指定文件中写数据
+ * 参  数1: 文件路径
+ * 参  数2: 需要写入的数据
+ * 返  回:  实际写入的数据(字节)
+ *******************************************************************************/
+int fs_write(const char *path, const char *buffer, uint32_t size)
+{
+    int writeSize = 0;
+    FILE *file = fopen(path, "w");
+    if (file == NULL)
+    {
+        ESP_LOGE(TAG, "%s打开失败", path);
+        fclose(file);
+        return -1;
+    }
+    else
+    {
+        writeSize = fwrite(buffer, sizeof(char), size, file);
+    }
+    fclose(file);
+    return writeSize;
 }

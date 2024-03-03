@@ -48,21 +48,21 @@ void wifi_event_handler(void *arg, esp_event_base_t event_base, int32_t event_id
 
 void task_wifi(void *arg)
 {
-    // wifi_config_t config;
-    // esp_wifi_get_config(WIFI_IF_STA, &config);
-    // printf("ssid: %s  ", (char *)config.sta.ssid);
-    // printf("password: %s\r\n", (char *)config.sta.password);
+    wifi_config_t config;
+    esp_wifi_get_config(WIFI_IF_STA, &config);
+    printf("ssid: %s  ", (char *)config.sta.ssid);
+    printf("password: %s\r\n", (char *)config.sta.password);
 
-    // esp_netif_ip_info_t ip_info;
-    // esp_netif_t *netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
-    // esp_netif_get_ip_info(netif, &ip_info);
-    // printf("IP: " IPSTR " ", IP2STR(&ip_info.ip));
-    // printf("Mask: " IPSTR " ", IP2STR(&ip_info.netmask));
-    // printf("Gw: " IPSTR "\n", IP2STR(&ip_info.gw));
+    esp_netif_ip_info_t ip_info;
+    esp_netif_t *netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
+    esp_netif_get_ip_info(netif, &ip_info);
+    printf("IP: " IPSTR " ", IP2STR(&ip_info.ip));
+    printf("Mask: " IPSTR " ", IP2STR(&ip_info.netmask));
+    printf("Gw: " IPSTR "\n", IP2STR(&ip_info.gw));
 
-    // esp_netif_dns_info_t dsn_info;
-    // esp_netif_get_dns_info(netif, ESP_NETIF_DNS_MAIN, &dsn_info);
-    // printf("dns: " IPSTR "\n", IP2STR(&dsn_info.ip.u_addr.ip4));
+    esp_netif_dns_info_t dsn_info;
+    esp_netif_get_dns_info(netif, ESP_NETIF_DNS_MAIN, &dsn_info);
+    printf("dns: " IPSTR "\n", IP2STR(&dsn_info.ip.u_addr.ip4));
     while (1)
     {
 
@@ -71,20 +71,27 @@ void task_wifi(void *arg)
     }
 }
 
+char *writeBuff = "111111111111111111\r\n222222222222222222222\r\n3333333333333333333333\r\n";
 void app_main()
 {
     led_init();
     spiffs_mount();
-    int len = isExist("/spiffs/p_uart.c");
-    char *fs_buff = (char *)malloc(len + 1);
-    printf("申请了%d字节\r\n", len + 1);
-    len = fs_read("/spiffs/p_uart.c", fs_buff, len);
+    char *fs_buff = (char *)malloc(1024 * 6);
+    int len = fs_write("/spiffs/write.txt", writeBuff, strlen(writeBuff));
 
+    len = fs_read("/spiffs/write.txt", fs_buff);
     fs_buff[len] = '\0';
+    printf("读取%d字节数据, => %s\r\n", len, fs_buff);
 
-    printf("%s\r\n", fs_buff);
+    len = fs_read("/spiffs/html.html", fs_buff);
+    fs_buff[len] = '\0';
+    printf("读取%d字节数据, => %s\r\n", len, fs_buff);
+
+    len = fs_read("/spiffs/json.json", fs_buff);
+    fs_buff[len] = '\0';
+    printf("读取%d字节数据, => %s\r\n", len, fs_buff);
 
     free(fs_buff);
-
+    wifi_sta_init(&wp, wifi_event_handler);
     xTaskCreate(task_wifi, "task_wifi", 1024 * 4, NULL, 5, &wifi_handle);
 }
