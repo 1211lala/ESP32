@@ -75,7 +75,16 @@ void app_main()
 {
     led_init();
     spiffs_mount();
+    int len = isExist("/spiffs/p_uart.c");
+    char *fs_buff = (char *)malloc(len + 1);
+    printf("申请了%d字节\r\n", len + 1);
+    len = fs_read("/spiffs/p_uart.c", fs_buff, len);
 
-    printf("文件大小为:%d\r\n", isExist("/spiffs/p_uart.c"));
+    fs_buff[len] = '\0';
+
+    printf("%s\r\n", fs_buff);
+
+    free(fs_buff);
+
     xTaskCreate(task_wifi, "task_wifi", 1024 * 4, NULL, 5, &wifi_handle);
 }
