@@ -1,9 +1,4 @@
-/**
- * https://docs.espressif.com/projects/esp-idf/zh_CN/v5.1.3/esp32/api-reference/peripherals/gptimer.html
-*/
-
 #include "p_gpttim.h"
-
 
 QueueHandle_t tim_queue = NULL;
 gptimer_handle_t gptimer = NULL;
