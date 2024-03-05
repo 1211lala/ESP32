@@ -9,6 +9,7 @@ idf_component_register(SRCS
                         "p_i2c_sht20.c"
                         "p_wifi_sta.c"
                         "spiffs.c"
+                        "http_client.c"
                        INCLUDE_DIRS ".")
 
 # 将 ../spiffs_data 的内容以 spiffs or fatfs or littlefs 的格式烧录进 storage 分区内

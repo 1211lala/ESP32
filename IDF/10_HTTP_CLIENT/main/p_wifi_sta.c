@@ -3,18 +3,18 @@
 EventGroupHandle_t s_wifi_event_group = NULL;
 
 struct WiFi_Param wp = {
-    .ssid = "Kean",
-    .password = "Kean.2023",
-    .ip = "192.168.8.188",
-    .gateway = "192.168.8.1",
-    .subnet = "255.255.255.0",
-    .dns = "114.114.114.114",
-    // .ssid = "Xiaomi_4C",
-    // .password = "121314liuAO#",
-    // .ip = "192.168.31.188",
-    // .gateway = "192.168.31.1",
+    // .ssid = "Kean",
+    // .password = "Kean.2023",
+    // .ip = "192.168.8.188",
+    // .gateway = "192.168.8.1",
     // .subnet = "255.255.255.0",
     // .dns = "114.114.114.114",
+    .ssid = "Xiaomi_4C",
+    .password = "121314liuAO#",
+    .ip = "192.168.31.188",
+    .gateway = "192.168.31.1",
+    .subnet = "255.255.255.0",
+    .dns = "114.114.114.114",
 };
 
 void wifi_sta_init(struct WiFi_Param *WiFi_Config, esp_event_handler_t esp_event_callback)
