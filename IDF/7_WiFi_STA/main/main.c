@@ -74,24 +74,45 @@ void task_wifi(void *arg)
 char *writeBuff = "111111111111111111\r\n222222222222222222222\r\n3333333333333333333333\r\n";
 void app_main()
 {
+
+    ESP_LOGE("RAM","初始内存: %ldKb\n", esp_get_free_heap_size() / 1024);
     led_init();
     spiffs_mount();
-    char *fs_buff = (char *)malloc(1024 * 6);
+    ESP_LOGE("RAM","挂在SPIFFS后: %ldKb\n", esp_get_free_heap_size() / 1024);
+    char *fs_buff = NULL;
     int len = fs_write("/spiffs/write.txt", writeBuff, strlen(writeBuff));
 
-    len = fs_read("/spiffs/write.txt", fs_buff);
-    fs_buff[len] = '\0';
-    printf("读取%d字节数据, => %s\r\n", len, fs_buff);
+    len = fs_read("/spiffs/write.txt", &fs_buff, 1024 * 6);
+    if (len > 0)
+    {
+        ESP_LOGE("RAM","读取文件后: %ldKb\n", esp_get_free_heap_size() / 1024);
+        fs_buff[len] = '\0';
+        printf("读取%d字节数据, => %s\r\n", len, fs_buff);
+        free(fs_buff);
+    }
+    ESP_LOGE("RAM","释放后: %ldKb\n", esp_get_free_heap_size() / 1024);
 
-    len = fs_read("/spiffs/html.html", fs_buff);
-    fs_buff[len] = '\0';
-    printf("读取%d字节数据, => %s\r\n", len, fs_buff);
+    len = fs_read("/spiffs/p_uart.c", &fs_buff, 1024 * 6);
+    if (len > 0)
+    {
+        ESP_LOGE("RAM","读取文件后: %ldKb\n", esp_get_free_heap_size() / 1024);
+        fs_buff[len] = '\0';
+        printf("读取%d字节数据, => %s\r\n", len, fs_buff);
+        free(fs_buff);
+    }
+    ESP_LOGE("RAM","释放后: %ldKb\n", esp_get_free_heap_size() / 1024);
 
-    len = fs_read("/spiffs/json.json", fs_buff);
-    fs_buff[len] = '\0';
-    printf("读取%d字节数据, => %s\r\n", len, fs_buff);
-
-    free(fs_buff);
+    len = fs_read("/spiffs/json.json", &fs_buff, 1024 * 6);
+    if (len > 0)
+    {
+        ESP_LOGE("RAM","读取文件后: %ldKb\n", esp_get_free_heap_size() / 1024);
+        fs_buff[len] = '\0';
+        printf("读取%d字节数据, => %s\r\n", len, fs_buff);
+        free(fs_buff);
+    }
+    ESP_LOGE("RAM","释放后: %ldKb\n", esp_get_free_heap_size() / 1024);
     wifi_sta_init(&wp, wifi_event_handler);
+    ESP_LOGE("RAM","开启WiFi后: %ldKb\n", esp_get_free_heap_size() / 1024);
     xTaskCreate(task_wifi, "task_wifi", 1024 * 4, NULL, 5, &wifi_handle);
+    ESP_LOGE("RAM","开启任务后后: %ldKb\n", esp_get_free_heap_size() / 1024);
 }

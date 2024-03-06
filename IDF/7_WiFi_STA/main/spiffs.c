@@ -95,7 +95,39 @@ int isExist(const char *path)
  * 参  数2: 缓存buffer
  * 返  回:  实际读取的字节数(字节)
  *******************************************************************************/
-int fs_read(const char *path, char *buffer)
+// int fs_read(const char *path, char *buffer)
+// {
+//     int readSize = 0;
+//     int fileSize = 0;
+//     fileSize = isExist(path);
+//     if (fileSize < 0)
+//     {
+//         return -1;
+//     }
+//     FILE *file = fopen(path, "r");
+//     if (file == NULL)
+//     {
+//         ESP_LOGE(TAG, "%s打开失败", path);
+//         fclose(file);
+//         return -1;
+//     }
+//     else
+//     {
+//         readSize = fread(buffer, sizeof(char), fileSize, file);
+//     }
+//     fclose(file);
+//     return readSize;
+// }
+
+
+/******************************************************************************
+ * 函数描述: 读取文件内容，一定要在读取成功后使用free(), 未成功不用在内部free
+ * 参  数1: 文件路径
+ * 参  数2: 缓存buffer
+ * 参  数3: 所允许分配的最大字节数
+ * 返  回:  实际读取的字节数(字节)
+ *******************************************************************************/
+int fs_read(const char *path, char **buffer, uint32_t max_size)
 {
     int readSize = 0;
     int fileSize = 0;
@@ -104,16 +136,23 @@ int fs_read(const char *path, char *buffer)
     {
         return -1;
     }
+    if (max_size < fileSize)
+    {
+        ESP_LOGE(TAG, "分配的内存不足");
+        return -1;
+    }
+    *buffer = malloc(fileSize);
     FILE *file = fopen(path, "r");
     if (file == NULL)
     {
         ESP_LOGE(TAG, "%s打开失败", path);
         fclose(file);
+        free(*buffer);
         return -1;
     }
     else
     {
-        readSize = fread(buffer, sizeof(char), fileSize, file);
+        readSize = fread(*buffer, sizeof(char), fileSize, file);
     }
     fclose(file);
     return readSize;
