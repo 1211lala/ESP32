@@ -9,12 +9,14 @@ struct WiFi_Param wp = {
     // .gateway = "192.168.8.1",
     // .subnet = "255.255.255.0",
     // .dns = "114.114.114.114",
-    .ssid = "Xiaomi_4C",
-    .password = "121314liuAO#",
-    .ip = "192.168.31.188",
-    .gateway = "192.168.31.1",
-    .subnet = "255.255.255.0",
-    .dns = "114.114.114.114",
+    // .ssid = "Xiaomi_4C",
+    // .password = "121314liuAO#",
+    // .ip = "192.168.31.188",
+    // .gateway = "192.168.31.1",
+    // .subnet = "255.255.255.0",
+    // .dns = "114.114.114.114",
+    .ssid = "realme GT Neo5",
+    .password = "12111211",
 };
 
 void wifi_sta_init(struct WiFi_Param *WiFi_Config, esp_event_handler_t esp_event_callback)
@@ -51,17 +53,17 @@ void wifi_sta_init(struct WiFi_Param *WiFi_Config, esp_event_handler_t esp_event
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &cfg_sta));
 
     /**************************************可选 配置静态IP**********************************************/
-    ESP_ERROR_CHECK(esp_netif_dhcpc_stop(esp_netif_get_handle_from_ifkey("WIFI_STA_DEF")));
-    esp_netif_ip_info_t ip_inifo = {};
-    inet_aton(wp.ip, &ip_inifo.ip);
-    inet_aton(wp.gateway, &ip_inifo.gw);
-    inet_aton(wp.subnet, &ip_inifo.netmask);
-    ESP_ERROR_CHECK(esp_netif_set_ip_info(esp_netif_get_handle_from_ifkey("WIFI_STA_DEF"), &ip_inifo));
+    // ESP_ERROR_CHECK(esp_netif_dhcpc_stop(esp_netif_get_handle_from_ifkey("WIFI_STA_DEF")));
+    // esp_netif_ip_info_t ip_inifo = {};
+    // inet_aton(wp.ip, &ip_inifo.ip);
+    // inet_aton(wp.gateway, &ip_inifo.gw);
+    // inet_aton(wp.subnet, &ip_inifo.netmask);
+    // ESP_ERROR_CHECK(esp_netif_set_ip_info(esp_netif_get_handle_from_ifkey("WIFI_STA_DEF"), &ip_inifo));
     /**************************************可选 配置静态IP**********************************************/
     /**************************************可选 配置DNS服务器**********************************************/
-    esp_netif_dns_info_t dnsInfo = {};
-    inet_aton(wp.dns, &dnsInfo.ip.u_addr.ip4);
-    ESP_ERROR_CHECK(esp_netif_set_dns_info(esp_netif_get_handle_from_ifkey("WIFI_STA_DEF"), ESP_NETIF_DNS_MAIN, &dnsInfo));
+    // esp_netif_dns_info_t dnsInfo = {};
+    // inet_aton(wp.dns, &dnsInfo.ip.u_addr.ip4);
+    // ESP_ERROR_CHECK(esp_netif_set_dns_info(esp_netif_get_handle_from_ifkey("WIFI_STA_DEF"), ESP_NETIF_DNS_MAIN, &dnsInfo));
     /**************************************可选 配置DNS服务器**********************************************/
 
     // 9: 设置WiFi事件

@@ -12,8 +12,8 @@
 
 extern esp_vfs_spiffs_conf_t conf;
 
-void spiffs_mount(void);
-void spiffs_scan(void);
+void fs_mount(void);
+void fs_scan(void);
 int isExist(const char *path);
 int fs_read(const char *path, char *buffer, uint32_t size);
 #endif

@@ -8,7 +8,7 @@ esp_vfs_spiffs_conf_t conf = {
     .max_files = 5,
     .format_if_mount_failed = true};
 
-void spiffs_mount(void)
+void fs_mount(void)
 {
     esp_err_t ret = esp_vfs_spiffs_register(&conf);
     if (ret != ESP_OK)
@@ -39,10 +39,10 @@ void spiffs_mount(void)
     {
         ESP_LOGI(TAG, "SPIFFS分区大小为%dK, 已使用: %dK", total / 1024, used / 1024);
     }
-    spiffs_scan();
+    fs_scan();
 }
 
-void spiffs_scan(void)
+void fs_scan(void)
 {
     char filepath[300];
     DIR *dir = opendir("/spiffs");

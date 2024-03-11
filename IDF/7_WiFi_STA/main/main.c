@@ -9,6 +9,8 @@
 #include "p_wifi_sta.h"
 #include "spiffs.h"
 
+static const char *TAG = "scan";
+
 TaskHandle_t wifi_handle;
 void wifi_event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
 {
@@ -23,6 +25,7 @@ void wifi_event_handler(void *arg, esp_event_base_t event_base, int32_t event_id
     {
         ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
 
+        s_retry_num = 0;
         ESP_LOGI("TEST_ESP32", "Got IP: " IPSTR, IP2STR(&event->ip_info.ip));
         ESP_LOGI("TEST_ESP32", "Got GW: " IPSTR, IP2STR(&event->ip_info.gw));
         ESP_LOGI("TEST_ESP32", "Got NT: " IPSTR, IP2STR(&event->ip_info.netmask));
@@ -32,87 +35,225 @@ void wifi_event_handler(void *arg, esp_event_base_t event_base, int32_t event_id
 
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED)
     {
-        if (s_retry_num < 10)
+        if (s_retry_num < 1000)
         {
             esp_wifi_connect();
             s_retry_num++;
-            ESP_LOGI("TAG", "retry to connect to the AP");
+            ESP_LOGE("TAG", "重新开始连接AP %d/%d", s_retry_num, 1000);
         }
         else
         {
             xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
+            ESP_LOGE("TAG", "连接失败");
         }
-        ESP_LOGI("TAG", "connect to the AP fail");
+        
+    }
+}
+
+static void print_auth_mode(int authmode)
+{
+    switch (authmode)
+    {
+    case WIFI_AUTH_OPEN:
+        ESP_LOGI(TAG, "Authmode \tWIFI_AUTH_OPEN");
+        break;
+    case WIFI_AUTH_OWE:
+        ESP_LOGI(TAG, "Authmode \tWIFI_AUTH_OWE");
+        break;
+    case WIFI_AUTH_WEP:
+        ESP_LOGI(TAG, "Authmode \tWIFI_AUTH_WEP");
+        break;
+    case WIFI_AUTH_WPA_PSK:
+        ESP_LOGI(TAG, "Authmode \tWIFI_AUTH_WPA_PSK");
+        break;
+    case WIFI_AUTH_WPA2_PSK:
+        ESP_LOGI(TAG, "Authmode \tWIFI_AUTH_WPA2_PSK");
+        break;
+    case WIFI_AUTH_WPA_WPA2_PSK:
+        ESP_LOGI(TAG, "Authmode \tWIFI_AUTH_WPA_WPA2_PSK");
+        break;
+    case WIFI_AUTH_WPA2_ENTERPRISE:
+        ESP_LOGI(TAG, "Authmode \tWIFI_AUTH_WPA2_ENTERPRISE");
+        break;
+    case WIFI_AUTH_WPA3_PSK:
+        ESP_LOGI(TAG, "Authmode \tWIFI_AUTH_WPA3_PSK");
+        break;
+    case WIFI_AUTH_WPA2_WPA3_PSK:
+        ESP_LOGI(TAG, "Authmode \tWIFI_AUTH_WPA2_WPA3_PSK");
+        break;
+    default:
+        ESP_LOGI(TAG, "Authmode \tWIFI_AUTH_UNKNOWN");
+        break;
+    }
+}
+static void print_cipher_type(int pairwise_cipher, int group_cipher)
+{
+    switch (pairwise_cipher)
+    {
+    case WIFI_CIPHER_TYPE_NONE:
+        ESP_LOGI(TAG, "Pairwise Cipher \tWIFI_CIPHER_TYPE_NONE");
+        break;
+    case WIFI_CIPHER_TYPE_WEP40:
+        ESP_LOGI(TAG, "Pairwise Cipher \tWIFI_CIPHER_TYPE_WEP40");
+        break;
+    case WIFI_CIPHER_TYPE_WEP104:
+        ESP_LOGI(TAG, "Pairwise Cipher \tWIFI_CIPHER_TYPE_WEP104");
+        break;
+    case WIFI_CIPHER_TYPE_TKIP:
+        ESP_LOGI(TAG, "Pairwise Cipher \tWIFI_CIPHER_TYPE_TKIP");
+        break;
+    case WIFI_CIPHER_TYPE_CCMP:
+        ESP_LOGI(TAG, "Pairwise Cipher \tWIFI_CIPHER_TYPE_CCMP");
+        break;
+    case WIFI_CIPHER_TYPE_TKIP_CCMP:
+        ESP_LOGI(TAG, "Pairwise Cipher \tWIFI_CIPHER_TYPE_TKIP_CCMP");
+        break;
+    case WIFI_CIPHER_TYPE_AES_CMAC128:
+        ESP_LOGI(TAG, "Pairwise Cipher \tWIFI_CIPHER_TYPE_AES_CMAC128");
+        break;
+    case WIFI_CIPHER_TYPE_SMS4:
+        ESP_LOGI(TAG, "Pairwise Cipher \tWIFI_CIPHER_TYPE_SMS4");
+        break;
+    case WIFI_CIPHER_TYPE_GCMP:
+        ESP_LOGI(TAG, "Pairwise Cipher \tWIFI_CIPHER_TYPE_GCMP");
+        break;
+    case WIFI_CIPHER_TYPE_GCMP256:
+        ESP_LOGI(TAG, "Pairwise Cipher \tWIFI_CIPHER_TYPE_GCMP256");
+        break;
+    default:
+        ESP_LOGI(TAG, "Pairwise Cipher \tWIFI_CIPHER_TYPE_UNKNOWN");
+        break;
+    }
+
+    switch (group_cipher)
+    {
+    case WIFI_CIPHER_TYPE_NONE:
+        ESP_LOGI(TAG, "Group Cipher \tWIFI_CIPHER_TYPE_NONE");
+        break;
+    case WIFI_CIPHER_TYPE_WEP40:
+        ESP_LOGI(TAG, "Group Cipher \tWIFI_CIPHER_TYPE_WEP40");
+        break;
+    case WIFI_CIPHER_TYPE_WEP104:
+        ESP_LOGI(TAG, "Group Cipher \tWIFI_CIPHER_TYPE_WEP104");
+        break;
+    case WIFI_CIPHER_TYPE_TKIP:
+        ESP_LOGI(TAG, "Group Cipher \tWIFI_CIPHER_TYPE_TKIP");
+        break;
+    case WIFI_CIPHER_TYPE_CCMP:
+        ESP_LOGI(TAG, "Group Cipher \tWIFI_CIPHER_TYPE_CCMP");
+        break;
+    case WIFI_CIPHER_TYPE_TKIP_CCMP:
+        ESP_LOGI(TAG, "Group Cipher \tWIFI_CIPHER_TYPE_TKIP_CCMP");
+        break;
+    case WIFI_CIPHER_TYPE_SMS4:
+        ESP_LOGI(TAG, "Group Cipher \tWIFI_CIPHER_TYPE_SMS4");
+        break;
+    case WIFI_CIPHER_TYPE_GCMP:
+        ESP_LOGI(TAG, "Group Cipher \tWIFI_CIPHER_TYPE_GCMP");
+        break;
+    case WIFI_CIPHER_TYPE_GCMP256:
+        ESP_LOGI(TAG, "Group Cipher \tWIFI_CIPHER_TYPE_GCMP256");
+        break;
+    default:
+        ESP_LOGI(TAG, "Group Cipher \tWIFI_CIPHER_TYPE_UNKNOWN");
+        break;
     }
 }
 
 void task_wifi(void *arg)
 {
+    wifi_sta_init(&wp, wifi_event_handler);
+
     wifi_config_t config;
     esp_wifi_get_config(WIFI_IF_STA, &config);
-    printf("ssid: %s  ", (char *)config.sta.ssid);
-    printf("password: %s\r\n", (char *)config.sta.password);
+    printf("ssid: %s    password: %s\r\n", (char *)config.sta.ssid, (char *)config.sta.password);
 
     esp_netif_ip_info_t ip_info;
     esp_netif_t *netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
     esp_netif_get_ip_info(netif, &ip_info);
-    printf("IP: " IPSTR " ", IP2STR(&ip_info.ip));
-    printf("Mask: " IPSTR " ", IP2STR(&ip_info.netmask));
-    printf("Gw: " IPSTR "\n", IP2STR(&ip_info.gw));
+    printf("ip: " IPSTR " gateway: " IPSTR "  subnet: " IPSTR "\r\n", IP2STR(&ip_info.ip), IP2STR(&ip_info.gw), IP2STR(&ip_info.netmask));
 
     esp_netif_dns_info_t dsn_info;
     esp_netif_get_dns_info(netif, ESP_NETIF_DNS_MAIN, &dsn_info);
-    printf("dns: " IPSTR "\n", IP2STR(&dsn_info.ip.u_addr.ip4));
+    printf("dns: " IPSTR "\r\n", IP2STR(&dsn_info.ip.u_addr.ip4));
     while (1)
     {
-
         vTaskDelay(1000 / portTICK);
         led_blink();
     }
 }
 
-char *writeBuff = "111111111111111111\r\n222222222222222222222\r\n3333333333333333333333\r\n";
+void scan_wifi(void *arg)
+{
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
+    {
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        ret = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK(ret);
+    ESP_ERROR_CHECK(esp_netif_init());
+    ESP_ERROR_CHECK(esp_event_loop_create_default());
+    esp_netif_t *sta_netif = esp_netif_create_default_wifi_sta();
+    assert(sta_netif);
+
+    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+
+    uint16_t number = 10;
+    wifi_ap_record_t ap_info[10];
+    uint16_t ap_count = 0;
+    memset(ap_info, 0, sizeof(ap_info));
+
+    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+    ESP_ERROR_CHECK(esp_wifi_start());
+    esp_wifi_scan_start(NULL, true);
+    ESP_ERROR_CHECK(esp_wifi_scan_get_ap_records(&number, ap_info));
+    ESP_ERROR_CHECK(esp_wifi_scan_get_ap_num(&ap_count));
+    ESP_LOGI(TAG, "Total APs scanned = %u", ap_count);
+    for (int i = 0; (i < 10) && (i < ap_count); i++)
+    {
+        ESP_LOGI(TAG, "SSID \t\t%s", ap_info[i].ssid);
+        ESP_LOGI(TAG, "RSSI \t\t%d", ap_info[i].rssi);
+        print_auth_mode(ap_info[i].authmode);
+        if (ap_info[i].authmode != WIFI_AUTH_WEP)
+        {
+            print_cipher_type(ap_info[i].pairwise_cipher, ap_info[i].group_cipher);
+        }
+        ESP_LOGI(TAG, "Channel \t\t%d\n", ap_info[i].primary);
+    }
+
+    s_wifi_event_group = xEventGroupCreate();
+    // 7: 配置STA参数 如SSID, 密码等参数
+    wifi_config_t cfg_sta = {};
+    strcpy((char *)cfg_sta.sta.ssid, wp.ssid);
+    strcpy((char *)cfg_sta.sta.password, wp.password);
+    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &cfg_sta));
+
+    esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, wifi_event_handler, NULL, NULL);
+    esp_event_handler_instance_register(IP_EVENT, IP_EVENT_STA_GOT_IP, wifi_event_handler, NULL, NULL);
+
+    /* 开始连接wifi */
+    esp_wifi_connect();
+
+    EventBits_t bits = xEventGroupWaitBits(s_wifi_event_group, WIFI_CONNECTED_BIT | WIFI_FAIL_BIT, pdFALSE, pdFALSE, portMAX_DELAY);
+    if (bits & WIFI_CONNECTED_BIT)
+    {
+        ESP_LOGI("TAG", "connected to ap SSID:%s password:%s", wp.ssid, wp.password);
+    }
+    else if (bits & WIFI_FAIL_BIT)
+    {
+        ESP_LOGI("TAG", "Failed to connect to SSID:%s, password:%s", wp.ssid, wp.password);
+    }
+    while (1)
+    {
+        vTaskDelay(1000 / portTICK);
+    }
+}
 void app_main()
 {
-
-    ESP_LOGE("RAM","初始内存: %ldKb\n", esp_get_free_heap_size() / 1024);
     led_init();
-    spiffs_mount();
-    ESP_LOGE("RAM","挂在SPIFFS后: %ldKb\n", esp_get_free_heap_size() / 1024);
-    char *fs_buff = NULL;
-    int len = fs_write("/spiffs/write.txt", writeBuff, strlen(writeBuff));
-
-    len = fs_read("/spiffs/write.txt", &fs_buff, 1024 * 6);
-    if (len > 0)
-    {
-        ESP_LOGE("RAM","读取文件后: %ldKb\n", esp_get_free_heap_size() / 1024);
-        fs_buff[len] = '\0';
-        printf("读取%d字节数据, => %s\r\n", len, fs_buff);
-        free(fs_buff);
-    }
-    ESP_LOGE("RAM","释放后: %ldKb\n", esp_get_free_heap_size() / 1024);
-
-    len = fs_read("/spiffs/p_uart.c", &fs_buff, 1024 * 6);
-    if (len > 0)
-    {
-        ESP_LOGE("RAM","读取文件后: %ldKb\n", esp_get_free_heap_size() / 1024);
-        fs_buff[len] = '\0';
-        printf("读取%d字节数据, => %s\r\n", len, fs_buff);
-        free(fs_buff);
-    }
-    ESP_LOGE("RAM","释放后: %ldKb\n", esp_get_free_heap_size() / 1024);
-
-    len = fs_read("/spiffs/json.json", &fs_buff, 1024 * 6);
-    if (len > 0)
-    {
-        ESP_LOGE("RAM","读取文件后: %ldKb\n", esp_get_free_heap_size() / 1024);
-        fs_buff[len] = '\0';
-        printf("读取%d字节数据, => %s\r\n", len, fs_buff);
-        free(fs_buff);
-    }
-    ESP_LOGE("RAM","释放后: %ldKb\n", esp_get_free_heap_size() / 1024);
-    wifi_sta_init(&wp, wifi_event_handler);
-    ESP_LOGE("RAM","开启WiFi后: %ldKb\n", esp_get_free_heap_size() / 1024);
-    xTaskCreate(task_wifi, "task_wifi", 1024 * 4, NULL, 5, &wifi_handle);
-    ESP_LOGE("RAM","开启任务后后: %ldKb\n", esp_get_free_heap_size() / 1024);
+    fs_mount();
+    // xTaskCreate(task_wifi, "task_wifi", 1024 * 4, NULL, 5, &wifi_handle);
+    xTaskCreate(scan_wifi, "scan_wifi", 1024 * 4, NULL, 5, NULL);
 }
