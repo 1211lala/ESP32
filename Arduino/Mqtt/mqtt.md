@@ -45,11 +45,11 @@
    2. **cleanSession**      true:对于重要的话题在服务端发送服务后,会等待客户端回复(Qos > 1). false:不会等待回复     
    3. username
    4. password
-   5. lastWillTopic
-   6. lastWillQos
-   7. lastWillMessage
-   8. lastWillRetain
-   9. **keepLive**          心跳时间间隔时间(单位:s)
+   5. lastWillTopic        遗嘱主题名
+   6. lastWillQos          遗嘱服务质量
+   7. lastWillMessage      遗嘱信息
+   8. lastWillRetain       遗嘱是否为保留信息
+   9. **keepLive**         心跳时间间隔时间(单位:s)
 
 2. `connack`报文
     1. sessionPresent       当 `cleanSession` 为 false 时如果有上次没有发送来的数据则返回 `true`
@@ -72,18 +72,18 @@
 5. `suback`报文
    1. returnCode            订阅返回码(与`subscribe`报文的订阅等级有关.)
 
-6. `unsubscribe`报文
-   1. packetId  
+6. `unsubscribe`报文  
+   1. packetId    
    2. topic1               取消订阅的主题1
    3. topic2               liuao/setLed
-   4. ....
+   4. ....  
 
 
 ### 通贝符
-1. `+`   
+1. `+`     
       home/sensor/+/temp   = home/sensor/bedroom/temp = home/sensor/kitchen/temp
 
-1. `#`
+1. `#`  
        home/sensor/#   = home/sensor/bedroom  = home/sensor/kitchen/temp
 
 
@@ -93,6 +93,7 @@
 - Qos == 0  最多发送一次
 - Qos == 1  最少发送一次   
 - Qos == 2  保证收一次
+- 最终以接收端/发送端较低的Qos为准
 
 #### 设置Qos等级
    1. 在`mqttClient.connect(clientId)`连接服务端时设置 `cleanSession`参数为`false`
@@ -106,5 +107,11 @@
 
 
 ### 心跳机制   
-   对于 publisher 会经常向服务端发送消息，那么服务端就知道这个客户端在线，但是对于只订阅消息不发布消息的就不清楚了，所以服务端采用心跳机制查看客户端是否在线
-   心跳机制是客户端定时`keepAlive`的时间的向服务端发送消息。
+      心跳机制是客户端定时`keepAlive`的时间的向服务端发送消息。
+      对于 publisher 会经常向服务端发送消息，那么服务端就知道这个客户端在线，但是对于只订阅消息不发布消息的就不清楚了，所以服务端采用心跳机制查看客户端是否在线。
+      
+
+
+### 遗嘱机制
+   在客户端意外断开连接时(未发送disconnect数据包)服务端执行的操作。
+   具体设置`connect`数据包中的数据

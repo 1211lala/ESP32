@@ -1,8 +1,10 @@
 #include "bsp_wifi.h"
 
 _wifi_config _wc = {
-    .ssid = "Xiaomi_4C",
-    .password = "121314liuAO#",
+    // .ssid = "Xiaomi_4C",
+    // .password = "121314liuAO#",
+    .ssid = "Kean",
+    .password = "Kean.2023",
     // .ssid = "ESP32- WiFi",
     // .password = "123456789",
 };

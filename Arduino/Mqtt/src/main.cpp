@@ -8,6 +8,7 @@ PubSubClient mqttClient(espClient);
 #define MQTT_PORT 1883
 #define MQTT_PUB "liuao/ledStatus"
 #define MQTT_RetainPUB "liuao/retainedMsg"
+
 #define MQTT_SUB "liuao/setLed"
 
 String clientId = "";
@@ -16,13 +17,13 @@ bool ledState = 0;
 const int subQoS = 1;            // 客户端订阅主题时使用的QoS级别（截止2020-10-07，仅支持QoS = 1，不支持QoS = 2）
 const bool cleanSession = false; // 清除会话（如QoS>0必须要设为false）
 
-const char *willTopic = "willTopic"; // 遗嘱主题名称
-const char *willMsg = "willMsg";     // 遗嘱主题信息
-const int willQos = 0;               // 遗嘱QoS
-const int willRetain = false;        // 遗嘱保留
+#define willTopic "liuao/willMsg"      // 遗嘱主题
+const char *willMsg = "esp32-offline"; // 遗嘱主题信息
+const int willQos = 0;                 // 遗嘱QoS
+const int willRetain = true;           // 遗嘱保留
+
 void connectMqttServer(const char *clientId)
 {
-
    /* cleanSession 设置为 false*/
    if (mqttClient.connect(clientId, NULL, NULL, willTopic, willQos, willRetain, willMsg, cleanSession))
    {
@@ -135,6 +136,27 @@ void mqttLoop(void *arg)
       vTaskDelay(50 / portTICK_PERIOD_MS);
    }
 }
+
+/******************************************************************************
+ * 函数功能: Mqtt遗嘱机制演示
+ ******************************************************************************/
+void lastWillTask(void *arg)
+{
+   while (!mqttClient.connected())
+   {
+      vTaskDelay(50 / portTICK_PERIOD_MS);
+   }
+   mqttClient.setKeepAlive(10);
+   while (1)
+   {
+      if (!mqttClient.publish(willTopic, "esp23-online", true))
+      {
+         loginfo("%s报文发送失败\r\n", willTopic);
+      }
+      vTaskDelay(5000 / portTICK_PERIOD_MS);
+   }
+}
+
 void setup()
 {
    pinMode(LED, OUTPUT);
@@ -151,6 +173,7 @@ void setup()
    xTaskCreatePinnedToCore(mqttPublishTask, "mqttPublishTask", 1024 * 4, NULL, 4, NULL, 1);
    xTaskCreatePinnedToCore(retainedPublishTask, "retainedPublishTask", 1024 * 4, NULL, 4, NULL, 1);
    xTaskCreatePinnedToCore(mqttSubscrbeTask, "mqttSubscrbeTask", 1024 * 4, NULL, 5, NULL, 1);
+   xTaskCreatePinnedToCore(lastWillTask, "lastWillTask", 1024 * 4, NULL, 5, NULL, 1);
    vTaskDelete(NULL);
 }
 
