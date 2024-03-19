@@ -48,3 +48,21 @@ int main()
 
     return 0;
 }
+
+/*
+double calculate(double error)
+{
+    // 在这里实现PID计算
+    double p_term = kp_ * error;
+    double i_term = ki_ * (integral_ + error);
+    double d_term = kd_ * (error - prev_error_);
+
+    double control_output = p_term + i_term + d_term;
+
+    // 更新积分项和误差
+    integral_ += error;
+    prev_error_ = error;
+
+    return control_output;
+}
+*/
