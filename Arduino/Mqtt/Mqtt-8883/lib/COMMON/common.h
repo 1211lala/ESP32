@@ -8,7 +8,7 @@ using namespace std;
 
 
 #define LED 2 /* 和核心板上的LED同一引脚 */
-
+#define KEY 0 /* 和核心板上的LED同一引脚 */
 
 void ledOn(void);
 void ledOff(void);

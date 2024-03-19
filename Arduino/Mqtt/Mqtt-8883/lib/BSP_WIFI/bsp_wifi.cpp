@@ -1,22 +1,19 @@
 #include "bsp_wifi.h"
 
 _wifi_config _wc = {
-    // .ssid = "Xiaomi_4C",
-    // .password = "121314liuAO#",
-    .ssid = "Kean",
-    .password = "Kean.2023",
-    .ip = "192.168.8.69",
-    .subnet = "255.255.255.0",
-    .gateway = "192.168.8.1",
-
-    // .ssid = "realme GT Neo5",
-    // .password = "12111211",
-    .dns = "114.114.114.114"
-    // .ip = "192.168.8.81",
+    .ssid = "Xiaomi_4C",
+    .password = "121314liuAO#",
+    // .ip = "192.168.8.69",
     // .subnet = "255.255.255.0",
     // .gateway = "192.168.8.1",
-    // .ssid = "ESP32- WiFi",
-    // .password = "123456789",
+    // .dns = "114.114.114.114"
+    // .ssid = "Kean",
+    // .password = "Kean.2023",
+    // .ip = "192.168.8.69",
+    // .subnet = "255.255.255.0",
+    // .gateway = "192.168.8.1",
+    // .dns = "114.114.114.114"
+
 };
 
 /******************************************************************************
@@ -32,7 +29,7 @@ void bsp_wifi_sta_init(_wifi_config &config)
 
     WiFi.mode(WIFI_MODE_STA);
     WiFi.begin(config.ssid, config.password);
-    WiFi.config(ip, gateway, subnet, dns);
+    // WiFi.config(ip, gateway, subnet, dns);
     /* 开启自动重连 */
     WiFi.getAutoReconnect();
     /* 关闭睡眠模式 */
