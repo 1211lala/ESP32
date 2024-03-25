@@ -25,7 +25,6 @@
  * #define LV_USE_PERF_MONITOR 1
  ******************************************************************************/
 
-
 /*******************************************************************************
  * Start of Arduino_GFX setting
  *
@@ -47,9 +46,8 @@
  * Teensy 4.1 dev board        : CS: 39, DC: 41, RST: 40, BL: 22, SCK: 13, MOSI: 11, MISO: 12
  ******************************************************************************/
 #include <Arduino_GFX_Library.h>
-#include "../.pio/libdeps/esp32-s3-devkitc-1/lvgl/examples/widgets/lv_example_widgets.h"
-#include "lvgl.h"
-
+// #include "../.pio/libdeps/esp32-s3-devkitc-1/lvgl/examples/widgets/lv_example_widgets.h"
+#include "../.pio/libdeps/esp32-s3-devkitc-1/lvgl/lvgl.h"
 
 #define GFX_BL 38
 
@@ -68,7 +66,6 @@ Arduino_ESP32RGBPanel *rgbpanel = new Arduino_ESP32RGBPanel(
 Arduino_RGB_Display *gfx = new Arduino_RGB_Display(
     480 /* width */, 480 /* height */, rgbpanel, 0 /* rotation */, true /* auto_flush */,
     bus, GFX_NOT_DEFINED /* RST */, st7701_type1_init_operations, sizeof(st7701_type1_init_operations));
-
 
 /* Change to your screen resolution */
 static uint32_t screenWidth;
@@ -97,8 +94,6 @@ void setup()
     Serial.begin(115200);
     // while (!Serial);
     Serial.println("LVGL Widgets Demo");
-
-    // Init touch device
 
     // Init Display
     gfx->begin();
@@ -135,14 +130,13 @@ void setup()
         disp_drv.draw_buf = &draw_buf;
         lv_disp_drv_register(&disp_drv);
 
-        /* Initialize the (dummy) input device driver */
-        static lv_indev_drv_t indev_drv;
-        lv_indev_drv_init(&indev_drv);
-        indev_drv.type = LV_INDEV_TYPE_POINTER;
-        indev_drv.read_cb = my_touchpad_read;
-        lv_indev_drv_register(&indev_drv);
-
-        lv_demo_widgets();
+        // /* Initialize the (dummy) input device driver */
+        // static lv_indev_drv_t indev_drv;
+        // lv_indev_drv_init(&indev_drv);
+        // indev_drv.type = LV_INDEV_TYPE_POINTER;
+        // indev_drv.read_cb = my_touchpad_read;
+        // lv_indev_drv_register(&indev_drv);
+        // lv_demo_widgets();
 
         Serial.println("Setup done");
     }
