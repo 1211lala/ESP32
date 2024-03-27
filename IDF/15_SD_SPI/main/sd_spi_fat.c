@@ -1,11 +1,11 @@
-
-
 /**
  * https://docs.espressif.com/projects/esp-idf/zh_CN/latest/esp32/api-reference/storage/fatfs.html
  * ESP-IDF 使用 FatFs 库来实现 FAT 文件系统
  *      如果使用了标志C库的文件函数 需要加上挂载文件系统的路径前缀 /sdcard/hello.c
  *      如果使用的 fatfs 的库函数则不用 /hello.c
  * 以下程序统一使用 fatfs 的函数
+ * 
+ * 使用长文件名打开 menuconfig 将 Long filename support 打开
  *
  *
  *
@@ -36,7 +36,7 @@ static const char *TAG = "sdcard";
 /* 最大同时打开的文件数 */
 #define MAX_FILES 4
 /* SPI总线的频率 单位 Khz */
-#define SPI_MAX_FREQ 10000
+#define SPI_MAX_FREQ 20000
 
 /******************************************************************************
  * 函数描述: spi总线初始化SD卡并挂载fatfs,在初始化前一定要设置为fat32模式
@@ -158,7 +158,7 @@ int fatfs_write(const char *path, char *buffer, uint32_t size)
  * 参  数2: 缓存buffer
  * 参  数3: 所允许分配的最大字节数
  * 返  回:  实际读取的字节数(字节)
- * 
+ *
 // int len = fatfs_read("/main.c", &buf, 2000);
 // if (len > 0)
 // {
@@ -197,28 +197,34 @@ int fatfs_read(const char *path, char **buffer, uint32_t max_size)
     return fileSize;
 }
 
-FRESULT fs_scan_dir(char *path)
+FRESULT fatfs_scan(char *path)
 {
     FF_DIR dir;
     FILINFO fno;
     FRESULT res = f_opendir(&dir, (const TCHAR *)path);
-    if (res == FR_OK) /* 目录打开成功 */
+    if (res == FR_OK)
     {
         while (1)
         {
             res = f_readdir(&dir, &fno);
             if ((res != FR_OK) || (fno.fname[0] == 0))
                 break;
-            //			if(FSinfo->fname[0] == '.') continue;
-            printf("%s", path);
-            printf("%-20s %ldbytes\r\n", fno.fname, fno.fsize);
+            if (fno.fname[0] == '.' && (fno.fname[1] == '\0' || (fno.fname[1] == '.' && fno.fname[2] == '\0')))
+                continue;
+            printf("%s/%-20s %ld bytes\n", path, fno.fname, fno.fsize);
+            if (fno.fattrib & AM_DIR)
+            {
+                char sub_path[512];
+                sprintf(sub_path, "%s/%s", path, fno.fname);
+                fatfs_scan(sub_path); // Recursively scan sub-directory
+            }
         }
         f_closedir(&dir);
         return FR_OK;
     }
     else
     {
-        printf("%s open fail! \r\n", path);
+        printf("%s open fail!\n", path);
         return FR_DISK_ERR;
     }
 }

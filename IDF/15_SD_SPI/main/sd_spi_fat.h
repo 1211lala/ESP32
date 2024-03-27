@@ -16,5 +16,5 @@ int sd_init_mount_fat(void);
 int fatfs_write(const char *path, char *data, uint32_t size);
 int fatfs_read(const char *path, char **buffer, uint32_t max_size);
 int isexist(const char *path);
-FRESULT fs_scan_dir(char *path);
+FRESULT fatfs_scan(char *path);
 #endif

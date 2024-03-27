@@ -252,15 +252,10 @@ void scan_wifi(void *arg)
 
 void fatfs_test(void *arg)
 {
-    char *buf;
-
     sd_init_mount_fat();
-    printf("%d\r\n", fatfs_write("/wwww.c", "sssss", strlen("sssss")));
-    fs_scan_dir("/");
+    fatfs_scan("/");
     while (1)
     {
-
-
         vTaskDelay(50);
     }
 }
