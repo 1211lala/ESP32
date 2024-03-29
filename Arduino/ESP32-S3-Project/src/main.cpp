@@ -47,7 +47,7 @@
  ******************************************************************************/
 #include <Arduino_GFX_Library.h>
 // #include "../.pio/libdeps/esp32-s3-devkitc-1/lvgl/examples/widgets/lv_example_widgets.h"
-#include "../.pio/libdeps/esp32-s3-devkitc-1/lvgl/lvgl.h"
+// #include "lvgl.h"
 
 #define GFX_BL 38
 
@@ -67,28 +67,6 @@ Arduino_RGB_Display *gfx = new Arduino_RGB_Display(
     480 /* width */, 480 /* height */, rgbpanel, 0 /* rotation */, true /* auto_flush */,
     bus, GFX_NOT_DEFINED /* RST */, st7701_type1_init_operations, sizeof(st7701_type1_init_operations));
 
-/* Change to your screen resolution */
-static uint32_t screenWidth;
-static uint32_t screenHeight;
-static lv_disp_draw_buf_t draw_buf;
-static lv_color_t *disp_draw_buf;
-static lv_disp_drv_t disp_drv;
-
-/* Display flushing */
-void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p)
-{
-    uint32_t w = (area->x2 - area->x1 + 1);
-    uint32_t h = (area->y2 - area->y1 + 1);
-
-#if (LV_COLOR_16_SWAP != 0)
-    gfx->draw16bitBeRGBBitmap(area->x1, area->y1, (uint16_t *)&color_p->full, w, h);
-#else
-    gfx->draw16bitRGBBitmap(area->x1, area->y1, (uint16_t *)&color_p->full, w, h);
-#endif
-
-    lv_disp_flush_ready(disp);
-}
-
 void setup()
 {
     Serial.begin(115200);
@@ -96,54 +74,30 @@ void setup()
     Serial.println("LVGL Widgets Demo");
 
     // Init Display
-    gfx->begin();
-    gfx->fillScreen(BLACK);
+    // Init Display
+    if (!gfx->begin())
+    {
+        Serial.println("gfx->begin() failed!");
+    }
+    gfx->fillScreen(RED);
 
 #ifdef GFX_BL
     pinMode(GFX_BL, OUTPUT);
     digitalWrite(GFX_BL, HIGH);
 #endif
 
-    lv_init();
-
-    screenWidth = gfx->width();
-    screenHeight = gfx->height();
-#ifdef ESP32
-    disp_draw_buf = (lv_color_t *)heap_caps_malloc(sizeof(lv_color_t) * screenWidth * 10, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
-#else
-    disp_draw_buf = (lv_color_t *)malloc(sizeof(lv_color_t) * screenWidth * 10);
-#endif
-    if (!disp_draw_buf)
-    {
-        Serial.println("LVGL disp_draw_buf allocate failed!");
-    }
-    else
-    {
-        lv_disp_draw_buf_init(&draw_buf, disp_draw_buf, NULL, screenWidth * 10);
-
-        /* Initialize the display */
-        lv_disp_drv_init(&disp_drv);
-        /* Change the following line to your display resolution */
-        disp_drv.hor_res = screenWidth;
-        disp_drv.ver_res = screenHeight;
-        disp_drv.flush_cb = my_disp_flush;
-        disp_drv.draw_buf = &draw_buf;
-        lv_disp_drv_register(&disp_drv);
-
-        // /* Initialize the (dummy) input device driver */
-        // static lv_indev_drv_t indev_drv;
-        // lv_indev_drv_init(&indev_drv);
-        // indev_drv.type = LV_INDEV_TYPE_POINTER;
-        // indev_drv.read_cb = my_touchpad_read;
-        // lv_indev_drv_register(&indev_drv);
-        // lv_demo_widgets();
-
-        Serial.println("Setup done");
-    }
+    gfx->setCursor(10, 10);
+    gfx->setTextColor(BLACK);
+    gfx->println("hello esp32 this PC");
+    Serial.println("Setup done");
 }
 
 void loop()
 {
-    lv_timer_handler(); /* let the GUI do its work */
-    delay(5);
+    gfx->setCursor(random(gfx->width()), random(gfx->height()));
+    gfx->setTextColor(random(0xffff), random(0xffff));
+    gfx->setTextSize(random(6) /* x scale */, random(6) /* y scale */, random(2) /* pixel_margin */);
+    gfx->println("Hello World!");
+
+    delay(1000); // 1 second
 }
