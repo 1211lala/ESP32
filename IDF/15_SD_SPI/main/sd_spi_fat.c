@@ -4,7 +4,7 @@
  *      如果使用了标志C库的文件函数 需要加上挂载文件系统的路径前缀 /sdcard/hello.c
  *      如果使用的 fatfs 的库函数则不用 /hello.c
  * 以下程序统一使用 fatfs 的函数
- * 
+ *
  * 使用长文件名打开 menuconfig 将 Long filename support 打开
  *
  *
@@ -185,7 +185,7 @@ int fatfs_read(const char *path, char **buffer, uint32_t max_size)
         ESP_LOGE(TAG, "failed to open %s    error code(%d)", path, fr);
         return -FR_NO_FILE;
     }
-    *buffer = malloc(fileSize);
+    *buffer = malloc(fileSize + 1);
     fr = f_read(&fil, *buffer, fileSize, &readSize);
     if (fr != FR_OK)
     {
