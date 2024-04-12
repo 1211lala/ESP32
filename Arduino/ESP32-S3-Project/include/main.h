@@ -1,11 +1,8 @@
 #ifndef _MAIN_H_
 #define _MAIN_H_
 
-#include <Arduino.h>
-#include <Arduino_GFX_Library.h>
 
-
-
-
+void lvgl_task(void *arg);
+void wifi_task(void *arg);
 
 #endif // !_MAIN_H_

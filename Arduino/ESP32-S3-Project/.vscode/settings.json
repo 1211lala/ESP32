@@ -5,6 +5,13 @@
         "string_view": "cpp",
         "bitset": "cpp",
         "new": "cpp",
-        "vector": "cpp"
+        "vector": "cpp",
+        "array": "cpp",
+        "deque": "cpp",
+        "unordered_map": "cpp",
+        "unordered_set": "cpp",
+        "initializer_list": "cpp",
+        "lv_demo_widgets.h": "c",
+        "lvgl.h": "c"
     }
 }

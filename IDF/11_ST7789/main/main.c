@@ -11,7 +11,9 @@
 #include "cJSON.h"
 #include "st7789.h"
 #include "led_brightness.h"
+#include "gpio_button.h"
 #include "lv_demos.h"
+
 TaskHandle_t wifi_handle = NULL;
 
 void wifi_event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
@@ -54,19 +56,42 @@ void task_led(void *arg)
 {
     while (1)
     {
-        vTaskDelay(1000 / portTICK);
+        vTaskDelay(500 / portTICK);
         led_blink();
     }
 }
+
+void btn1_callback(lv_event_t *e)
+{
+    ESP_LOGE("btn1", "btn_callback");
+}
+
+void btn2_callback(lv_event_t *e)
+{
+    ESP_LOGE("btn2", "btn_callback");
+}
 void app_main()
 {
+    led_init();
     st7789_init();
-    lv_demo_benchmark();
+    gpio_button_init();
     display_brightness_init();
     display_brightness_set(50);
-    led_init();
-    // key_general_init();
-    // spiffs_mount();
+
+    lv_obj_t *obj1 = lv_btn_create(lv_scr_act());
+    lv_obj_set_size(obj1, 60, 30);
+    lv_obj_align(obj1, LV_ALIGN_CENTER, -40, 0);
+    // lv_obj_set_style_bg_color(obj, lv_color_hex(0x1b1b1b), LV_STATE_DEFAULT );
+    lv_obj_set_style_bg_color(obj1, lv_color_hex(0xff0000), LV_STATE_CHECKED);
+    lv_obj_add_event_cb(obj1, btn1_callback, LV_EVENT_CLICKED, NULL);
+
+    lv_obj_t *obj2 = lv_btn_create(lv_scr_act());
+    lv_obj_set_size(obj2, 60, 30);
+    lv_obj_align(obj2, LV_ALIGN_CENTER, 40, 0);
+    // lv_obj_set_style_bg_color(obj, lv_color_hex(0x1b1b1b), LV_STATE_DEFAULT );
+    lv_obj_set_style_bg_color(obj2, lv_color_hex(0xff0000), LV_STATE_CHECKED);
+    lv_obj_add_event_cb(obj2, btn2_callback, LV_EVENT_CLICKED, NULL);
+
     // wifi_sta_init(&wp, wifi_event_handler);
     xTaskCreate(task_led, "task_led", 1024 * 4, NULL, 5, &wifi_handle);
 }

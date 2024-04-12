@@ -1,12 +1,7 @@
 #include "st7701s_lvgl.h"
 #include "touch.h"
-#include <esp32-hal-dac.h> //DAC功能引用该库，可以不进行#include<>引用
 
-#define st7701s_bl 38
 
-#define HEIGHT 480
-#define WIDTH 480
-#define BUF_SIZE WIDTH * 200 /* 但是感觉在这里设置的不怎么对, 要在 lv_conf.h 中改才行 */
 
 Arduino_DataBus *bus = new Arduino_SWSPI(
     GFX_NOT_DEFINED /* DC */, 39 /* CS */,
@@ -77,7 +72,6 @@ void my_touchpad_read(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
 /**************************************************************************************
  * 函数功能:
  **************************************************************************************/
-
 void st7701s_init(uint8_t level)
 {
     pinMode(st7701s_bl, OUTPUT);
@@ -152,32 +146,12 @@ int st7701s_lvgl_init(void)
     }
     return ESP_OK;
 }
-// /**************************************************************************************
-//  * 函数功能:
-//  **************************************************************************************/
-// static const uint32_t ST_HIGH = 480;
-// static const uint32_t ST_WEIGHT = 480;
-// lv_style_t style_btn;
 
-// void lvgl_runing_app(void)
-// {
-//     lv_style_init(&style_btn);
-//     lv_style_set_bg_color(&style_btn, lv_color_hex(0XDF0000));     /* 设置背景 */
-//     lv_style_set_bg_opa(&style_btn, LV_OPA_80);                    /* 设置背景透明度 */
-//     lv_style_set_border_width(&style_btn, 1);                      /* 设置边框的宽度 */
-//     lv_style_set_border_color(&style_btn, lv_color_hex(0XDF0000)); /* 设置边框的颜色 */
 
-//     lv_obj_t *Obj1 = lv_obj_create(lv_scr_act());
-//     lv_obj_set_size(Obj1, ST_WEIGHT / 2.8, ST_HIGH / 6);
-//     lv_obj_align(Obj1, LV_ALIGN_TOP_LEFT, ST_WEIGHT / 48, ST_HIGH / 48);
-//     lv_obj_add_style(Obj1, &style_btn, LV_STATE_DEFAULT); /* 设置对象 1 的样式 */
 
-//     lv_obj_t *Obj2 = lv_obj_create(lv_scr_act());
-//     lv_obj_set_size(Obj2, ST_WEIGHT / 6, ST_HIGH / 2.8);
-//     lv_obj_align(Obj2, LV_ALIGN_CENTER, 0, 0);
-//     lv_obj_add_style(Obj2, &style_btn, LV_STATE_PRESSED); /* 设置对象 1 的样式 */
-// }
-
+/**************************************************************************************
+ * 函数功能:
+ **************************************************************************************/
 static lv_obj_t *bar;
 static lv_obj_t *obj1;
 static lv_obj_t *obj2;
