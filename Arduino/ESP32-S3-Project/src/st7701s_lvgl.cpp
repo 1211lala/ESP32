@@ -1,8 +1,6 @@
 #include "st7701s_lvgl.h"
 #include "touch.h"
 
-
-
 Arduino_DataBus *bus = new Arduino_SWSPI(
     GFX_NOT_DEFINED /* DC */, 39 /* CS */,
     48 /* SCK */, 47 /* MOSI */, GFX_NOT_DEFINED /* MISO */);
@@ -147,65 +145,62 @@ int st7701s_lvgl_init(void)
     return ESP_OK;
 }
 
-
-
 /**************************************************************************************
  * 函数功能:
  **************************************************************************************/
-static lv_obj_t *bar;
-static lv_obj_t *obj1;
-static lv_obj_t *obj2;
-static lv_obj_t *label;
 
-uint32_t value = 4;
+
+static uint32_t bg_color[] = {0xff0000, 0x00ff00, 0x0000ff};
+static lv_obj_t *objArray[3];
+static lv_obj_t *label[3];
+static lv_obj_t *btn;
 
 static void button_event_cb(lv_event_t *event)
 {
     lv_obj_t *target = lv_event_get_target(event);   /*获取触发部件类型*/
     lv_event_code_t code = lv_event_get_code(event); /*获取触发事件类型*/
 
-    if (target == obj1)
+    if (target == btn)
     {
-        value += 1;
-        lv_bar_set_value(bar, value, LV_ANIM_ON);
-        set_light(value);
+        if (code == LV_EVENT_SHORT_CLICKED)
+        {
+            lv_obj_set_pos(objArray[0], Rand(), Rand());
+            lv_obj_clear_flag(objArray[0], LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(objArray[1], LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(objArray[2], LV_OBJ_FLAG_HIDDEN);
+        }
+        else if (code == LV_EVENT_LONG_PRESSED)
+        {
+            lv_obj_set_pos(objArray[1], Rand(), Rand());
+            lv_obj_add_flag(objArray[0], LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(objArray[1], LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(objArray[2], LV_OBJ_FLAG_HIDDEN);
+            loginfo("LV_EVENT_LONG_PRESSED\r\n");
+        }
+
+        
     }
-    else if (target == obj2)
-    {
-        value -= 1;
-        lv_bar_set_value(bar, value, LV_ANIM_ON);
-        set_light(value);
-    }
-    loginfo("value = %d\r\n",value);
 }
 
 void lvgl_runing_app(void)
 {
+    for (uint8_t i = 0; i < 3; i++)
+    {
+        objArray[i] = lv_obj_create(lv_scr_act());
+        lv_obj_set_size(objArray[i], LV_PCT(30), LV_PCT(30));
+        lv_obj_set_style_bg_color(objArray[i], lv_color_hex(bg_color[i]), LV_STATE_DEFAULT);
+        lv_obj_align(objArray[i], LV_ALIGN_CENTER, 0, -100);
 
-    obj1 = lv_btn_create(lv_scr_act());
-    lv_obj_set_size(obj1, LV_PCT(10), LV_PCT(10));
-    lv_obj_align(obj1, LV_ALIGN_LEFT_MID, 20, -40);
-    lv_obj_t *label = lv_label_create(obj1);
-    lv_label_set_text_fmt(label, "+");
-    lv_obj_center(label);
-    lv_obj_add_event_cb(obj1, button_event_cb, LV_EVENT_CLICKED, NULL);
+        lv_obj_add_flag(objArray[i], LV_OBJ_FLAG_HIDDEN);
 
-    obj2 = lv_btn_create(lv_scr_act());
-    lv_obj_set_size(obj2, LV_PCT(10), LV_PCT(10));
-    lv_obj_align(obj2, LV_ALIGN_LEFT_MID, 20, 40);
-    label = lv_label_create(obj2);
-    lv_label_set_text_fmt(label, "-");
-    lv_obj_center(label);
-    lv_obj_add_event_cb(obj2, button_event_cb, LV_EVENT_CLICKED, NULL);
+        label[i] = lv_label_create(objArray[i]);
+        lv_label_set_text_fmt(label[i], "OBJ%d", i);
+        lv_obj_align(label[i], LV_ALIGN_CENTER, 0, 0);
+    }
 
-    bar = lv_bar_create(lv_scr_act());
-    lv_obj_set_size(bar, 10, 300);
-    lv_obj_align(bar, LV_ALIGN_RIGHT_MID, -30, 0);
-
-    lv_bar_set_range(bar, 1, 10);
-    lv_bar_set_start_value(bar, 4, LV_ANIM_ON);
-
-    lv_obj_set_style_anim_time(bar, 100, LV_STATE_DEFAULT);
-
-    lv_bar_set_value(bar, value, LV_ANIM_ON);
+    btn = lv_btn_create(lv_scr_act());
+    lv_obj_set_size(btn, LV_PCT(15), LV_PCT(8));
+    lv_obj_align(btn, LV_ALIGN_CENTER, 0, 200);
+    lv_obj_add_event_cb(btn, button_event_cb, LV_EVENT_SHORT_CLICKED, NULL);
+    lv_obj_add_event_cb(btn, button_event_cb, LV_EVENT_LONG_PRESSED, NULL);
 }

@@ -1,14 +1,14 @@
 #include "wifi_fun.h"
 
 _wifi_config _wc = {
-    // .ssid = "Xiaomi_4C",
-    // .password = "121314liuAO#",
+    .ssid = "Xiaomi_4C",
+    .password = "121314liuAO#",
     // .ip = "192.168.8.69",
     // .subnet = "255.255.255.0",
     // .gateway = "192.168.8.1",
     // .dns = "114.114.114.114"
-    .ssid = "Kean",
-    .password = "Kean.2023",
+    // .ssid = "Kean",
+    // .password = "Kean.2023",
     // .ip = "192.168.8.69",
     // .subnet = "255.255.255.0",
     // .gateway = "192.168.8.1",

@@ -21,10 +21,6 @@ void ws2812_spi(void *arg)
         ws2812_push_data();
         vTaskDelay(1000 / portTICK);
 
-
-
-
-
         color = 0x00ff00;
         ws2812_change_select(1, &color);
         ws2812_push_data();

@@ -11,10 +11,13 @@ void lvgl_runing_app(void);
 
 #define HEIGHT 480
 #define WIDTH 480
+#define WEIGHT 480 
+
 #define st7701s_bl 38
 
+#define Rand() (rand() % (300 - 200) + 200)
 
-#define BUF_SIZE WIDTH * 200 /* 但是感觉在这里设置的不怎么对, 要在 lv_conf.h 中改才行 */
+#define BUF_SIZE 100U * 1024U /* 但是感觉在这里设置的不怎么对, 要在 lv_conf.h 中改才行 */
 
 
 #endif // !_ST7701S_LVGL_H_
