@@ -1,0 +1,30 @@
+{
+  "C_Cpp.intelliSenseEngine": "default",
+  "files.associations": {
+    "stdio.h": "c",
+    "lv_demos.h": "c",
+    "lvgl.h": "c",
+    "st7789v2_spi.h": "c",
+    "lv_port_disp_template.h": "c",
+    "stdbool.h": "c",
+    "unistd.h": "c",
+    "common.h": "c",
+    "sdmmc_cmd.h": "c",
+    "esp_vfs_fat.h": "c",
+    "stat.h": "c",
+    "spi_master.h": "c",
+    "gpio.h": "c",
+    "freertos.h": "c",
+    "task.h": "c",
+    "lv_port_disp.h": "c",
+    "array": "c",
+    "bitset": "c",
+    "string_view": "c",
+    "initializer_list": "c",
+    "regex": "c",
+    "utility": "c"
+  },
+  "idf.flashType": "UART",
+  "idf.portWin": "COM28",
+  "idf.adapterTargetName": "esp32"
+}
