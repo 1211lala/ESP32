@@ -25,7 +25,7 @@ void ws2812_spi_init(void)
     buscfg.quadhd_io_num = -1;
     buscfg.quadwp_io_num = -1;
     buscfg.max_transfer_sz = SOC_SPI_MAXIMUM_BUFFER_SIZE;
-
+    
     spi_device_interface_config_t devcfg = {};
     devcfg.clock_source = SPI_CLK_SRC_DEFAULT;
     devcfg.clock_speed_hz = 8 * 1000 * 1000;
