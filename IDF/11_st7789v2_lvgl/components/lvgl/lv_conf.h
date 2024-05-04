@@ -27,7 +27,7 @@
 #define LV_COLOR_DEPTH 16
 
 /*Swap the 2 bytes of RGB565 color. Useful if the display has an 8-bit interface (e.g. SPI)*/
-#define LV_COLOR_16_SWAP 0
+#define LV_COLOR_16_SWAP 1
 
 /*Enable features to draw on transparent background.
  *It's required if opa, and transform_* style properties are used.
@@ -49,7 +49,7 @@
 #define LV_MEM_CUSTOM 0
 #if LV_MEM_CUSTOM == 0
     /*Size of the memory available for `lv_mem_alloc()` in bytes (>= 2kB)*/
-    #define LV_MEM_SIZE (48U * 1024U)          /*[bytes]*/
+    #define LV_MEM_SIZE (30 * 1024U)          /*[bytes]*/
 
     /*Set an address for the memory pool instead of allocating it as a normal array. Can be in external SRAM too.*/
     #define LV_MEM_ADR 0     /*0: unused*/
@@ -758,14 +758,14 @@
 #define LV_USE_DEMO_KEYPAD_AND_ENCODER 0
 
 /*Benchmark your system*/
-#define LV_USE_DEMO_BENCHMARK 0
+#define LV_USE_DEMO_BENCHMARK 1
 #if LV_USE_DEMO_BENCHMARK
 /*Use RGB565A8 images with 16 bit color depth instead of ARGB8565*/
 #define LV_DEMO_BENCHMARK_RGB565A8 0
 #endif
 
 /*Stress test for LVGL*/
-#define LV_USE_DEMO_STRESS 0
+#define LV_USE_DEMO_STRESS 1
 
 /*Music player demo*/
 #define LV_USE_DEMO_MUSIC 0

@@ -16,15 +16,14 @@
  *      DEFINES
  *********************/
 #ifndef MY_DISP_HOR_RES
-#warning Please define or replace the macro MY_DISP_HOR_RES with the actual screen width, default value 320 is used for now.
 #define MY_DISP_HOR_RES 240
 #endif
 
 #ifndef MY_DISP_VER_RES
-#warning Please define or replace the macro MY_DISP_HOR_RES with the actual screen height, default value 240 is used for now.
 #define MY_DISP_VER_RES 280
 #endif
-
+#define  lvglBufSize  240 * 40
+static lv_color_t buf_1[lvglBufSize];                             /*A buffer for 10 rows*/
 /**********************
  *      TYPEDEFS
  **********************/
@@ -84,8 +83,7 @@ void lv_port_disp_init(void)
 
     /* Example for 1) */
     static lv_disp_draw_buf_t draw_buf_dsc_1;
-    static lv_color_t buf_1[MY_DISP_HOR_RES * 40];                             /*A buffer for 10 rows*/
-    lv_disp_draw_buf_init(&draw_buf_dsc_1, buf_1, NULL, MY_DISP_HOR_RES * 40); /*Initialize the display buffer*/
+    lv_disp_draw_buf_init(&draw_buf_dsc_1, buf_1, NULL, lvglBufSize); /*Initialize the display buffer*/
 
     // /* Example for 2) */
     // static lv_disp_draw_buf_t draw_buf_dsc_2;
@@ -138,9 +136,7 @@ void lv_port_disp_init(void)
 /*Initialize your display and the required peripherals.*/
 static void disp_init(void)
 {
-    uint16_t color = 0xffff;
     st7789_init();
-    lcd_fill(0, 0, 240, 280, &color);
     /*You code here*/
 }
 
@@ -164,21 +160,18 @@ void disp_disable_update(void)
  *You can use DMA or any hardware acceleration to do this operation in the background but
  *'lv_disp_flush_ready()' has to be called when finished.*/
 
-uint8_t buff[33600];
+
 static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p)
 {
     LCD_Address_Set(area->x1, area->y1, area->x2, area->y2);
-    uint32_t size = (area->x2 - area->x1 +1) * (area->y2 - area->y1 + 1) * 2;
-
-    for (uint32_t i = 0; i < size / 2; i++)
-    {
-        buff[i * 2] = *((uint16_t *)color_p + i) >> 8;
-        buff[i * 2 + 1] = *((uint16_t *)color_p + i);
-    }
-    lcd_send_bytes(buff, size, DATA);
+    uint32_t size = (area->x2 - area->x1 + 1) * (area->y2 - area->y1 + 1) * 2;
+    printf("size = %ld \r\n", size);
+    lcd_send_bytes((uint8_t *)color_p, size, DATA);
 
     lv_disp_flush_ready(disp_drv);
 }
+
+
 
 /*OPTIONAL: GPU INTERFACE*/
 

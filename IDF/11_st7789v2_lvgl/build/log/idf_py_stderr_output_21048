@@ -1,0 +1,9 @@
+CMake Error at D:/SoftWare/ESP_IDF/esp_idf_v_5.1.1/esp-idf/tools/cmake/build.cmake:266 (message):
+  Failed to resolve component 'lv_port_disp'.
+Call Stack (most recent call first):
+  D:/SoftWare/ESP_IDF/esp_idf_v_5.1.1/esp-idf/tools/cmake/build.cmake:302 (__build_resolve_and_add_req)
+  D:/SoftWare/ESP_IDF/esp_idf_v_5.1.1/esp-idf/tools/cmake/build.cmake:595 (__build_expand_requirements)
+  D:/SoftWare/ESP_IDF/esp_idf_v_5.1.1/esp-idf/tools/cmake/project.cmake:547 (idf_build_process)
+  CMakeLists.txt:14 (project)
+
+

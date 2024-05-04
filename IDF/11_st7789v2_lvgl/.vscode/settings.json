@@ -22,9 +22,23 @@
     "string_view": "c",
     "initializer_list": "c",
     "regex": "c",
-    "utility": "c"
+    "utility": "c",
+    "lv_demo_benchmark.h": "c",
+    "lv_demo_stress.h": "c",
+    "gptimer.h": "c",
+    "lv_port_indev.h": "c",
+    "*.tcc": "c",
+    "optional": "c",
+    "istream": "c",
+    "ostream": "c",
+    "ratio": "c",
+    "system_error": "c",
+    "functional": "c",
+    "tuple": "c",
+    "type_traits": "c",
+    "keyboard.h": "c"
   },
   "idf.flashType": "UART",
-  "idf.portWin": "COM28",
+  "idf.portWin": "COM35",
   "idf.adapterTargetName": "esp32"
 }

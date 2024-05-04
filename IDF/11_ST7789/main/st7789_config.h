@@ -17,7 +17,7 @@
 #define LCD_PIN_DC 4 // lcd的dc引脚
 #define LCD_PIN_CS -1 // lcd的cs引脚（可不配置cs脚）
 
-#define LCD_PIXEL_CLOCK_HZ_SPI (40 * 100 * 1000) // lcd的spi的频率40~80mhz都可以，推荐40mhz
+#define LCD_PIXEL_CLOCK_HZ_SPI (80 * 100 * 1000) // lcd的spi的频率40~80mhz都可以，推荐40mhz
 
 // =================================
 

@@ -1,7 +1,7 @@
 {
   "C_Cpp.intelliSenseEngine": "default",
   "idf.flashType": "UART",
-  "idf.portWin": "COM28",
+  "idf.portWin": "COM35",
   "idf.adapterTargetName": "esp32",
   "files.associations": {
     "bspled.h": "c",
@@ -68,6 +68,12 @@
     "lv_demo_keypad_encoder.h": "c",
     "lv_demo_music.h": "c",
     "esp_lvgl_port.h": "c",
-    "gpio_button.h": "c"
+    "gpio_button.h": "c",
+    "lvgl.h": "c",
+    "spi_master.h": "c",
+    "bitset": "c",
+    "memory": "c",
+    "random": "c",
+    "future": "c"
   }
 }

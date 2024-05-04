@@ -1,0 +1,20 @@
+Compiler supported targets: xtensa-esp32-elf
+
+CMake Error at D:/SoftWare/ESP_IDF/esp_idf_v_5.1.1/esp-idf/tools/cmake/component.cmake:479 (add_library):
+  Cannot find source file:
+
+    E:/MY_CODE/ESP32/IDF/11_st7789v2_lvgl/components/lv_port_indev/lv_port_disp.c
+
+  Tried extensions .c .C .c++ .cc .cpp .cxx .cu .mpp .m .M .mm .ixx .cppm .h
+  .hh .h++ .hm .hpp .hxx .in .txx .f .F .for .f77 .f90 .f95 .f03 .hip .ispc
+Call Stack (most recent call first):
+  components/lv_port_indev/CMakeLists.txt:2 (idf_component_register)
+
+
+CMake Error at D:/SoftWare/ESP_IDF/esp_idf_v_5.1.1/esp-idf/tools/cmake/component.cmake:479 (add_library):
+  No SOURCES given to target: __idf_lv_port_indev
+Call Stack (most recent call first):
+  components/lv_port_indev/CMakeLists.txt:2 (idf_component_register)
+
+
+CMake Generate step failed.  Build files cannot be regenerated correctly.

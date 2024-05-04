@@ -3,9 +3,6 @@
 // #define user_cs
 static const int portTICK = 10;
 static spi_device_handle_t spi;
-
-uint8_t lcd_buf[buffSize];
-
 struct ST7789V2 lcd = {
 	.sckPin = 18,
 	.sdaPin = 17,
@@ -18,7 +15,7 @@ struct ST7789V2 lcd = {
 	.width = 240,
 	.heigh = 280,
 	.horizonta = 0,
-	.spiSize = 33608,
+	.spiSize = 19200,		// 这个是值spi一次传输的最大数据量
 };
 
 void lcd_send_bytes(const uint8_t *data, int16_t len, uint8_t dc)
@@ -40,7 +37,8 @@ void lcd_send_bytes(const uint8_t *data, int16_t len, uint8_t dc)
 	t.length = len * 8;
 	t.tx_buffer = data;
 	t.user = (void *)1;
-	ret = spi_device_polling_transmit(spi, &t);
+	ret = spi_device_transmit(spi, &t);
+	// ret = spi_device_polling_transmit(spi, &t);
 	assert(ret == ESP_OK);
 
 #ifdef user_cs
@@ -103,7 +101,7 @@ void st7789_init(void)
 	devcfg.mode = 0;
 	devcfg.flags = SPI_DEVICE_NO_DUMMY;
 
-	ESP_ERROR_CHECK(spi_bus_initialize(lcd.spi, &buscfg, SPI_DMA_CH_AUTO));
+       	ESP_ERROR_CHECK(spi_bus_initialize(lcd.spi, &buscfg, SPI_DMA_CH_AUTO));
 	ESP_ERROR_CHECK(spi_bus_add_device(lcd.spi, &devcfg, &spi));
 
 	st7789v2_res_on();
@@ -197,22 +195,12 @@ void st7789_init(void)
 
 void LCD_Address_Set(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2)
 {
-	if (lcd.horizonta == 0)
+	if (lcd.horizonta == 0 || lcd.horizonta == 1)
 	{
 		y1 += 20;
 		y2 += 20;
 	}
-	else if (lcd.horizonta == 1)
-	{
-		y1 += 20;
-		y2 += 20;
-	}
-	else if (lcd.horizonta == 2)
-	{
-		x1 += 20;
-		x2 += 20;
-	}
-	else
+	else if (lcd.horizonta == 2 || lcd.horizonta == 3)
 	{
 		x1 += 20;
 		x2 += 20;
@@ -230,54 +218,13 @@ void LCD_Address_Set(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2)
 	datay2[0] = y2 >> 8;
 	datay2[1] = y2 & 0xff;
 
-	lcd_send_byte(0x2a, CMD); // 列地址设置
+	lcd_send_byte(0x2a, CMD);
 	lcd_send_bytes(datax1, 2, DATA);
 	lcd_send_bytes(datax2, 2, DATA);
-	lcd_send_byte(0x2b, CMD); // 行地址设置
+	lcd_send_byte(0x2b, CMD);
 	lcd_send_bytes(datay1, 2, DATA);
 	lcd_send_bytes(datay2, 2, DATA);
-	lcd_send_byte(0x2c, CMD); // 储存器写
-}
-
-void lcd_fill(uint16_t xsta, uint16_t ysta, uint16_t xend, uint16_t yend, uint16_t *color)
-{
-	LCD_Address_Set(xsta, ysta, xend - 1, yend - 1);
-
-	uint32_t size = (xend - xsta) * (yend - ysta) * 2;
-
-	if (size == 0)
-	{
-		lcd_buf[0] = *color >> 8;
-		lcd_buf[1] = *color;
-		lcd_send_bytes(lcd_buf, 2, DATA);
-	}
-	else
-	{
-		if (buffSize >= size)
-		{
-			for (uint32_t i = 0; i < size / 2; i++)
-			{
-				lcd_buf[i * 2] = *color >> 8;
-				lcd_buf[i * 2 + 1] = *color;
-			}
-			lcd_send_bytes(lcd_buf, size, DATA);
-		}
-		else
-		{
-			for (uint16_t i = 0; i < buffSize / 2; i++)
-			{
-				lcd_buf[i * 2] = *color >> 8;
-				lcd_buf[i * 2 + 1] = *color;
-			}
-			uint32_t minsize = size % buffSize;
-
-			for (uint16_t j = 0; j < size / buffSize; j++)
-			{
-				lcd_send_bytes(lcd_buf, buffSize, DATA);
-			}
-			lcd_send_bytes(lcd_buf, minsize, DATA);
-		}
-	}
+	lcd_send_byte(0x2c, CMD);
 }
 
 // void lcd_fill(uint16_t xsta, uint16_t ysta, uint16_t xend, uint16_t yend, uint16_t *color)
@@ -286,4 +233,38 @@ void lcd_fill(uint16_t xsta, uint16_t ysta, uint16_t xend, uint16_t yend, uint16
 
 // 	uint32_t size = (xend - xsta) * (yend - ysta) * 2;
 
+// 	if (size == 0)
+// 	{
+// 		lcd_buf[0] = *color >> 8;
+// 		lcd_buf[1] = *color;
+// 		lcd_send_bytes(lcd_buf, 2, DATA);
+// 	}
+// 	else
+// 	{
+// 		if (buffSize >= size)
+// 		{
+// 			for (uint32_t i = 0; i < size / 2; i++)
+// 			{
+// 				lcd_buf[i * 2] = *color >> 8;
+// 				lcd_buf[i * 2 + 1] = *color;
+// 			}
+// 			lcd_send_bytes(lcd_buf, size, DATA);
+// 		}
+// 		else
+// 		{
+// 			for (uint16_t i = 0; i < buffSize / 2; i++)
+// 			{
+// 				lcd_buf[i * 2] = *color >> 8;
+// 				lcd_buf[i * 2 + 1] = *color;
+// 			}
+// 			uint32_t minsize = size % buffSize;
+
+// 			for (uint16_t j = 0; j < size / buffSize; j++)
+// 			{
+// 				lcd_send_bytes(lcd_buf, buffSize, DATA);
+// 			}
+// 			lcd_send_bytes(lcd_buf, minsize, DATA);
+// 		}
+// 	}
 // }
+
