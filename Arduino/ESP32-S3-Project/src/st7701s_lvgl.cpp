@@ -6,12 +6,35 @@ Arduino_DataBus *bus = new Arduino_SWSPI(
     48 /* SCK */, 47 /* MOSI */, GFX_NOT_DEFINED /* MISO */);
 
 Arduino_ESP32RGBPanel *rgbpanel = new Arduino_ESP32RGBPanel(
-    18 /* DE */, 17 /* VSYNC */, 16 /* HSYNC */, 21 /* PCLK */,
-    11 /* R0 */, 12 /* R1 */, 13 /* R2 */, 14 /* R3 */, 0 /* R4 */,
-    8 /* G0 */, 20 /* G1 */, 3 /* G2 */, 46 /* G3 */, 9 /* G4 */, 10 /* G5 */,
-    4 /* B0 */, 5 /* B1 */, 6 /* B2 */, 7 /* B3 */, 15 /* B4 */,
-    1 /* hsync_polarity */, 10 /* hsync_front_porch */, 8 /* hsync_pulse_width */, 50 /* hsync_back_porch */,
-    1 /* vsync_polarity */, 10 /* vsync_front_porch */, 8 /* vsync_pulse_width */, 20 /* vsync_back_porch */);
+
+    18 /* DE */,
+    17 /* VSYNC */,
+    16 /* HSYNC */,
+    21 /* PCLK */,
+    11 /* R0 */,
+    12 /* R1 */,
+    13 /* R2 */,
+    14 /* R3 */,
+    0 /* R4 */,
+    8 /* G0 */,
+    20 /* G1 */,
+    3 /* G2 */,
+    46 /* G3 */,
+    9 /* G4 */,
+    10 /* G5 */,
+    4 /* B0 */,
+    5 /* B1 */,
+    6 /* B2 */,
+    7 /* B3 */,
+    15 /* B4 */,
+    1 /* hsync_polarity */,
+    10 /* hsync_front_porch */,
+    8 /* hsync_pulse_width */,
+    50 /* hsync_back_porch */,
+    1 /* vsync_polarity */,
+    10 /* vsync_front_porch */,
+    8 /* vsync_pulse_width */,
+    20 /* vsync_back_porch */);
 
 Arduino_RGB_Display *gfx = new Arduino_RGB_Display(
     WIDTH /* width */, HEIGHT /* height */, rgbpanel, 0 /* rotation */, true /* auto_flush */,
@@ -149,7 +172,6 @@ int st7701s_lvgl_init(void)
  * 函数功能:
  **************************************************************************************/
 
-
 static uint32_t bg_color[] = {0xff0000, 0x00ff00, 0x0000ff};
 static lv_obj_t *objArray[3];
 static lv_obj_t *label[3];
@@ -177,8 +199,6 @@ static void button_event_cb(lv_event_t *event)
             lv_obj_add_flag(objArray[2], LV_OBJ_FLAG_HIDDEN);
             loginfo("LV_EVENT_LONG_PRESSED\r\n");
         }
-
-        
     }
 }
 
