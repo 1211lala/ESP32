@@ -84,13 +84,6 @@ void app_main(void)
     lvgl_indev_init();
     lv_png_init();
 
-    //  lv_obj_t* label = lv_label_create(lv_scr_act());
-    //  lv_obj_set_style_text_font(label,&myFont_20,LV_STATE_DEFAULT);
-    //  lv_label_set_text(label,"刘奥Hello ALIENTEK!!!!");
-
-    // lv_demo_benchmark();
-    // menu_slider();
-
     xTaskCreatePinnedToCore(system_info, "system_info", 1024 * 10, NULL, 4, NULL, 1);
     xTaskCreatePinnedToCore(lvgl_hander, "lvgl_hander", 1024 * 10, NULL, 5, NULL, 1);
 }
@@ -100,61 +93,40 @@ lv_obj_t *img = NULL;
 void system_info(void *arg)
 {
     sd_init_mount_fat();
-
     img = lv_img_create(lv_scr_act());
-
-    // wifi_sta_init(&wp, wifi_event_callback);
-    // mqtt_init();
-    // int sockfd = wifi_tcp_client_init("192.168.8.100", 8080);
     while (1)
     {
         lv_img_set_src(img, "/sdcard/1image.png");
         lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
-        vTaskDelay(pdMS_TO_TICKS(500));
+        vTaskDelay(pdMS_TO_TICKS(1000));
 
         lv_img_set_src(img, "/sdcard/2image.png");
         lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
-        vTaskDelay(pdMS_TO_TICKS(500));
-
-        lv_img_set_src(img, "/sdcard3/image.png");
-        lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
-        vTaskDelay(pdMS_TO_TICKS(500));
-
-        lv_img_set_src(img, "/sdcard4/image.png");
-        lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
-        vTaskDelay(pdMS_TO_TICKS(500));
-
-        lv_img_set_src(img, "/sdcard5/image.png");
-        lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
-        vTaskDelay(pdMS_TO_TICKS(500));
-
-        lv_img_set_src(img, "/sdcard6/image.png");
-        lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
-        vTaskDelay(pdMS_TO_TICKS(500));
-
-        lv_img_set_src(img, "/sdcard7/image.png");
-        lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
-        vTaskDelay(pdMS_TO_TICKS(500));
-
-        lv_img_set_src(img, "/sdcard8/image.png");
-        lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
-        vTaskDelay(pdMS_TO_TICKS(500));
-
-        // int cnt = send(sockfd, "hello\r\n", strlen("hello\r\n"), 0);
         vTaskDelay(pdMS_TO_TICKS(1000));
 
-        // if (cnt < 0)
-        // {
-        //     close(sockfd);
-        //     sockfd = -1;
-        //     while (sockfd < 0)
-        //     {
-        //         printf("2sockfd:%d cnt: %d\r\n", sockfd, cnt);
+        lv_img_set_src(img, "/sdcard/3image.png");
+        lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
+        vTaskDelay(pdMS_TO_TICKS(1000));
 
-        //         sockfd = wifi_tcp_client_init("192.168.8.100", 8080);
-        //         vTaskDelay(pdMS_TO_TICKS(200));
-        //     }
-        // }
+        lv_img_set_src(img, "/sdcard4/4image.png");
+        lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
+        vTaskDelay(pdMS_TO_TICKS(1000));
+
+        lv_img_set_src(img, "/sdcard/5image.png");
+        lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
+        vTaskDelay(pdMS_TO_TICKS(1000));
+
+        lv_img_set_src(img, "/sdcard/6image.png");
+        lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
+        vTaskDelay(pdMS_TO_TICKS(1000));
+
+        lv_img_set_src(img, "/sdcard/7image.png");
+        lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
+        vTaskDelay(pdMS_TO_TICKS(1000));
+
+        lv_img_set_src(img, "/sdcard/8image.png");
+        lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
+        vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
 

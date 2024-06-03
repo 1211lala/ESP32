@@ -1,4 +1,4 @@
-#include "p_wifi_sta.h"
+#include "wifi_sta.h"
 
 EventGroupHandle_t s_wifi_event_group = NULL;
 
@@ -19,9 +19,63 @@ struct WiFi_Param wp = {
     // .password = "12111211",
 };
 
+
+
+void wifi_event_callback(void *event_handler_arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
+{
+    static int s_retry_num = 0;
+
+    if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START)
+    {
+        esp_wifi_connect();
+    }
+
+    if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP)
+    {
+
+        ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
+
+        s_retry_num = 0;
+        ESP_LOGI("wifi", "获取IP地址: " IPSTR, IP2STR(&event->ip_info.ip));
+        ESP_LOGI("wifi", "获取网关: " IPSTR, IP2STR(&event->ip_info.gw));
+        ESP_LOGI("wifi", "获取子网掩码: " IPSTR, IP2STR(&event->ip_info.netmask));
+
+        // if (use_lvgl == true)
+        // {
+        //     // 为IP地址字符串分配正确大小的缓冲区 (最多15个字符 + 终止符)
+        //     char temp[16];
+        //     sprintf(temp, "%ld.%ld.%ld.%ld",
+        //             (event->ip_info.ip.addr >> 0) & 0xFF,
+        //             (event->ip_info.ip.addr >> 8) & 0xFF,
+        //             (event->ip_info.ip.addr >> 16) & 0xFF,
+        //             (event->ip_info.ip.addr >> 24) & 0xFF);
+        //     const char *ssid = "Kean.2023";
+        //     lv_label_set_text_fmt(wifi_label, "WIFI: %s\n\n  IP : %s", ssid, temp);
+        // }
+
+        xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
+    }
+
+    if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED)
+    {
+        if (s_retry_num < 3)
+        {
+            esp_wifi_connect();
+            s_retry_num++;
+            ESP_LOGE("wifi", "重新开始连接AP %d/%d", s_retry_num, 1000);
+        }
+        else
+        {
+            xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
+            ESP_LOGE("wifi", "连接失败");
+        }
+    }
+}
+
+
+
 void wifi_sta_init(struct WiFi_Param *WiFi_Config, esp_event_handler_t esp_event_callback)
 {
-
     s_wifi_event_group = xEventGroupCreate();
     // 1: 初始化 NVS
     esp_err_t err = nvs_flash_init();
@@ -87,53 +141,3 @@ void wifi_sta_init(struct WiFi_Param *WiFi_Config, esp_event_handler_t esp_event
         ESP_LOGI("TAG", "Failed to connect to SSID:%s, password:%s", wp.ssid, wp.password);
     }
 }
-
-/******************************************************************************
- * 函数描述: TCP客户端初始化，使用IPV4
- * 参  数1: 服务端TCP的IP
- * 参  数2: 服务端的端口
- * 返  回3: 返回tcp的ID
- *******************************************************************************/
-uint32_t wifi_tcp_client_init(const char *ip, uint16_t port)
-{
-
-    int sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
-    if (sockfd < 0)
-    {
-        ESP_LOGE("socket", "创建失败");
-        return sockfd;
-    }
-    ESP_LOGI("socket", "socket创建成功,将连接至 %s:%d", ip, port);
-    /* 设置TCP的IP和端口 */
-    struct sockaddr_in serverAddress;
-    serverAddress.sin_family = AF_INET;
-    inet_pton(AF_INET, ip, &serverAddress.sin_addr.s_addr);
-    serverAddress.sin_port = htons(port);
-    int rc = connect(sockfd, (struct sockaddr *)&serverAddress, sizeof(struct sockaddr_in));
-
-    if (rc != 0)
-    {
-        close(sockfd);
-        ESP_LOGE("socket", "连接%s:%d失败", ip, port);
-        return rc;
-    }
-    return sockfd;
-}
-
-/*
-
-        // int cnt = send(sockfd, "hello\r\n", strlen("hello\r\n"), 0);
-        // if (cnt < 0)
-        // {
-        //     close(sockfd);
-        //     sockfd = -1;
-        //     while (sockfd < 0)
-        //     {
-        //         printf("2sockfd:%d cnt: %d\r\n", sockfd, cnt);
-
-        //         sockfd = wifi_tcp_client_init("192.168.8.100", 8080);
-        //         vTaskDelay(pdMS_TO_TICKS(200));
-        //     }
-        // }
-
-*/

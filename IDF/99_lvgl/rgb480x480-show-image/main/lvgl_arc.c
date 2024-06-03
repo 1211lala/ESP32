@@ -2,8 +2,8 @@
 
 static lv_obj_t *bg = NULL;
 
-static lv_obj_t * SramArc;
-static lv_obj_t * PramArc;
+static lv_obj_t *SramArc;
+static lv_obj_t *PramArc;
 
 int32_t SramTotal = 300;
 int32_t PramTotal = 80000;

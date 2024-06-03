@@ -1,0 +1,29 @@
+{
+    "idf.adapterTargetName": "esp32s3",
+    "files.associations": {
+        "device_gt911.h": "c",
+        "lvglstart.h": "c",
+        "device_st7701s.h": "c",
+        "lvgl_interface.h": "c",
+        "stdio.h": "c",
+        "p_wifi_sta.h": "c",
+        "lv_demos.h": "c",
+        "lvgl.h": "c",
+        "sdkconfig.h": "c",
+        "datafile.h": "c",
+        "wifi_sta.h": "c",
+        "sd_spi_fat.h": "c",
+        "wifi_mqtt.h": "c",
+        "*.tcc": "c",
+        "limits": "c",
+        "numeric": "c",
+        "streambuf": "c",
+        "tuple": "c",
+        "type_traits": "c",
+        "utility": "c",
+        "param.h": "c"
+    },
+    "C_Cpp.errorSquiggles": "enabled",
+    "idf.flashType": "UART",
+    "idf.port": "/dev/ttyUSB0"
+}
