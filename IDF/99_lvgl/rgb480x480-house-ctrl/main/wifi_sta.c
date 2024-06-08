@@ -19,8 +19,6 @@ struct WiFi_Param wp = {
     // .password = "12111211",
 };
 
-
-
 void wifi_event_callback(void *event_handler_arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
 {
     static int s_retry_num = 0;
@@ -29,13 +27,13 @@ void wifi_event_callback(void *event_handler_arg, esp_event_base_t event_base, i
     {
         esp_wifi_connect();
     }
-
     if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP)
     {
 
         ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
 
         s_retry_num = 0;
+        wp.isConnected = true;
         ESP_LOGI("wifi", "获取IP地址: " IPSTR, IP2STR(&event->ip_info.ip));
         ESP_LOGI("wifi", "获取网关: " IPSTR, IP2STR(&event->ip_info.gw));
         ESP_LOGI("wifi", "获取子网掩码: " IPSTR, IP2STR(&event->ip_info.netmask));
@@ -58,7 +56,8 @@ void wifi_event_callback(void *event_handler_arg, esp_event_base_t event_base, i
 
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED)
     {
-        if (s_retry_num < 3)
+        wp.isConnected = false;
+        if (s_retry_num < 100)
         {
             esp_wifi_connect();
             s_retry_num++;
@@ -72,10 +71,9 @@ void wifi_event_callback(void *event_handler_arg, esp_event_base_t event_base, i
     }
 }
 
-
-
 void wifi_sta_init(struct WiFi_Param *WiFi_Config, esp_event_handler_t esp_event_callback)
 {
+    WiFi_Config->isConnected = false;
     s_wifi_event_group = xEventGroupCreate();
     // 1: 初始化 NVS
     esp_err_t err = nvs_flash_init();

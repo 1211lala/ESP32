@@ -16,84 +16,80 @@
 #include "esp_ota_ops.h"
 #include <sys/param.h>
 #include "mqtt_client.h"
+
 struct mqtt_dev mqttdev;
 
 static const char *TAG = "mqtt";
 
+void mqtt_connect(bool reconnect);
+bool flag = 0;
+
 void mqtt_start_task(void)
 {
-    xTaskCreate(mqtt_task, "mqtt_task", 1024 * 4, NULL, 5, &mqttdev.taskHandle);
+    mqttdev.isConnected = false;
+    xTaskCreate(mqtt_task, "mqtt_task", 1024 * 4, NULL, 6, &mqttdev.taskHandle);
     vTaskSuspend(mqttdev.taskHandle);
 
-    esp_mqtt_client_config_t mqtt_cfg = {};
-    mqtt_cfg.broker.address.uri = mqttUri;
+    mqttdev.config.broker.address.uri = mqttUri;
 
-    mqtt_cfg.session.last_will.topic = mqttLastWill;
-    mqtt_cfg.session.last_will.msg = "offline";
-    mqtt_cfg.session.last_will.msg_len = strlen("offline");
-    mqtt_cfg.session.last_will.retain = true;
-    mqtt_cfg.session.last_will.qos = 1;
-    mqtt_cfg.session.keepalive = 20;
-
-    mqttdev.client = esp_mqtt_client_init(&mqtt_cfg);
-    esp_mqtt_client_register_event(mqttdev.client, ESP_EVENT_ANY_ID, mqtt_event_handler, NULL);
-    esp_mqtt_client_start(mqttdev.client);
+    mqttdev.config.session.last_will.topic = mqttLastWill;
+    mqttdev.config.session.last_will.msg = "offline";
+    mqttdev.config.session.last_will.msg_len = strlen("offline");
+    mqttdev.config.session.last_will.retain = true;
+    mqttdev.config.session.last_will.qos = 1;
+    mqttdev.config.session.keepalive = 20;
+    mqttdev.config.credentials.username = "user-1";
+    mqttdev.config.credentials.authentication.password = "user-1";
+    mqtt_connect(false);
 }
 
-
-
-
-void mqtt_reconnect(void)
+void mqtt_connect(bool reconnect)
 {
-
-    esp_mqtt_client_config_t mqtt_cfg = {};
-    mqtt_cfg.broker.address.uri = mqttUri;
-
-    mqtt_cfg.session.last_will.topic = mqttLastWill;
-    mqtt_cfg.session.last_will.msg = "offline";
-    mqtt_cfg.session.last_will.msg_len = strlen("offline");
-    mqtt_cfg.session.last_will.retain = true;
-    mqtt_cfg.session.last_will.qos = 1;
-    mqtt_cfg.session.keepalive = 20;
-
-    mqttdev.client = esp_mqtt_client_init(&mqtt_cfg);
+    if (reconnect == true)
+    {
+        esp_mqtt_client_destroy(mqttdev.client);
+    }
+    mqttdev.client = esp_mqtt_client_init(&mqttdev.config);
     esp_mqtt_client_register_event(mqttdev.client, ESP_EVENT_ANY_ID, mqtt_event_handler, NULL);
     esp_mqtt_client_start(mqttdev.client);
-
-    vTaskDelay(pdMS_TO_TICKS(500));
-    esp_mqtt_client_subscribe(mqttdev.client, mqttRoomLedRead, 0);
-    vTaskDelay(pdMS_TO_TICKS(100));
-    esp_mqtt_client_subscribe(mqttdev.client, mqttFanRead, 0);
-    vTaskDelay(pdMS_TO_TICKS(100));
-    esp_mqtt_client_subscribe(mqttdev.client, mqttCurtainRead, 0);
-    vTaskDelay(pdMS_TO_TICKS(100));
-    esp_mqtt_client_subscribe(mqttdev.client, mqttWcLedRead, 0);
-    vTaskDelay(pdMS_TO_TICKS(100));
-    esp_mqtt_client_subscribe(mqttdev.client, mqttLoop, 1);
-    vTaskDelay(pdMS_TO_TICKS(100));
-    esp_mqtt_client_publish(mqttdev.client, mqttLastWill, "online", 0, 1, 1);
 }
 
 void mqtt_task(void *arg)
 {
-    vTaskDelay(pdMS_TO_TICKS(500));
-    esp_mqtt_client_subscribe(mqttdev.client, mqttRoomLedRead, 0);
-    vTaskDelay(pdMS_TO_TICKS(100));
-    esp_mqtt_client_subscribe(mqttdev.client, mqttFanRead, 0);
-    vTaskDelay(pdMS_TO_TICKS(100));
-    esp_mqtt_client_subscribe(mqttdev.client, mqttCurtainRead, 0);
-    vTaskDelay(pdMS_TO_TICKS(100));
-    esp_mqtt_client_subscribe(mqttdev.client, mqttWcLedRead, 0);
-    vTaskDelay(pdMS_TO_TICKS(100));
-    esp_mqtt_client_subscribe(mqttdev.client, mqttLoop, 1);
-    vTaskDelay(pdMS_TO_TICKS(100));
-    esp_mqtt_client_publish(mqttdev.client, mqttLastWill, "online", 0, 1, 1);
     while (1)
     {
-        vTaskDelay(pdMS_TO_TICKS(2000));
-        esp_mqtt_client_enqueue(mqttdev.client, mqttLoop, "loop", 0, 0, 0, true);
+        if (wp.isConnected == true) /* 未断开 */
+        {
+            vTaskDelay(pdMS_TO_TICKS(2000));
+
+            if (mqttdev.isConnected == true)
+            {
+                esp_mqtt_client_enqueue(mqttdev.client, mqttLoop, "loop", 0, 0, 0, true);
+            }
+
+            if (mqttdev.isConnected == false)
+            {
+                vTaskDelay(pdMS_TO_TICKS(2000));
+                mqtt_connect(true);
+            }
+        }
+        else /* wifi断开 */
+        {
+            if (flag == 0)
+            {
+                flag = 1;
+                esp_mqtt_client_destroy(mqttdev.client);
+            }
+            if (wp.isConnected == true)
+            {
+                ESP_LOGE("mqtt", "WIFi断开\r\n");
+                mqtt_connect(false);
+            }
+            vTaskDelay(pdMS_TO_TICKS(2000));
+        }
     }
 }
+
 void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data)
 {
     esp_mqtt_event_handle_t event = event_data;
@@ -101,10 +97,21 @@ void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event
     switch (event_id)
     {
     case MQTT_EVENT_CONNECTED:
+        mqttdev.isConnected = true;
+        flag = 0;
         ESP_LOGI(TAG, "mqtt服务端连接成功\r\n");
+
         vTaskResume(mqttdev.taskHandle);
+
+        esp_mqtt_client_subscribe(mqttdev.client, mqttRoomLedRead, 0);
+        esp_mqtt_client_subscribe(mqttdev.client, mqttFanRead, 0);
+        esp_mqtt_client_subscribe(mqttdev.client, mqttCurtainRead, 0);
+        esp_mqtt_client_subscribe(mqttdev.client, mqttWcLedRead, 0);
+        esp_mqtt_client_subscribe(mqttdev.client, mqttLoop, 1);
+        esp_mqtt_client_publish(mqttdev.client, mqttLastWill, "online", 0, 1, 1);
         break;
     case MQTT_EVENT_DISCONNECTED:
+        mqttdev.isConnected = false;
         ESP_LOGI(TAG, "mqtt断开连接成功\r\n");
         break;
     case MQTT_EVENT_SUBSCRIBED:
@@ -183,6 +190,7 @@ void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event
 
         break;
     case MQTT_EVENT_ERROR:
+        mqttdev.isConnected = false;
         ESP_LOGE("mqtt", "mqtt出现错误");
         break;
     }

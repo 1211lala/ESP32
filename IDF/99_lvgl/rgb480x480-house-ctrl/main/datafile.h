@@ -22,14 +22,15 @@ struct WiFi_Param
     char *gateway;
     char *subnet;
     char *dns;
+    bool isConnected;
 };
 extern struct WiFi_Param wp;
 extern EventGroupHandle_t s_wifi_event_group;
 
 /*******************************************WIFI********************************************************/
-// #define mqttUri "mqtt://mqtt.eclipseprojects.io"
+#define mqttUri "mqtt://mqtt.eclipseprojects.io"
 
-#define mqttUri "mqtt://192.168.10.40"
+// #define mqttUri "mqtt://192.168.10.40"
 
 #define mqttRoomLedCtrl "/liuao/switch/roomLed/write"
 #define mqttFanCtrl "/liuao/switch/fan/write"
@@ -47,6 +48,8 @@ struct mqtt_dev
 {
     TaskHandle_t taskHandle;
     esp_mqtt_client_handle_t client;
+    esp_mqtt_client_config_t config;
+    bool isConnected;
 };
 extern struct mqtt_dev mqttdev;
 
@@ -61,5 +64,7 @@ extern lv_obj_t *label00;
 extern lv_obj_t *label11;
 extern lv_obj_t *label22;
 extern lv_obj_t *label33;
+
+
 
 #endif

@@ -10,12 +10,14 @@
 
 void app_main(void)
 {
-    
+    lvgl_start_task();
+    menu_demo();
     wifi_sta_init(&wp, wifi_event_callback);
     mqtt_start_task();
 
-    lvgl_start_task();
-    menu_demo();
+    while (mqttdev.isConnected == false)
+    {
+        vTaskDelay(pdMS_TO_TICKS(100));
+    }
+    vTaskDelay(pdMS_TO_TICKS(100));
 }
-
-
